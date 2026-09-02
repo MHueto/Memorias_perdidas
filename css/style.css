@@ -1,0 +1,94 @@
+@import url('https://googleapis.com');
+
+*, ::before, ::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    background-image: url(/home/mateus/Documentos/memorias_perdidas/assets/images/background_img.jpeg);
+    background-size: cover;                  /* Igual ao object-fit: preenche a tela toda sem distorcer */
+    background-position: center;             /* Centraliza a imagem na tela */
+    background-repeat: no-repeat;            /* Impede que a imagem fique se repetindo */
+    background-attachment: fixed;            /* Faz a imagem ficar travada ao rolar a página (opcional) */
+    
+    
+    min-height: 100vh;                       /* Garante que o fundo cubra pelo menos 100% da altura da tela */
+    font-family: sans-serif;
+}
+
+.conteudo {
+    position: relative;
+    z-index: 1;
+    color: #ffffff;
+    text-align: left;
+    padding-top: 20vh;
+    font-family: sans-serif;
+}
+
+.title{
+    text-align: right;
+    margin: 50px;
+}
+
+.button{
+    font-family: 'Press Start 2P', cursive;
+    font-size: 16px;
+    color: #ffffff;
+    background-color: transparent;
+    border: 3px solid #ffffff;
+    
+   
+    width: 320px;            
+    padding: 15px 0;         
+    text-align: center;      
+    
+    cursor: pointer;
+    outline: none;
+    transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+
+}
+
+.button:hover {
+    box-shadow: 4px 4px 0px #000;
+    transform: translate(-2px, 2px);
+}
+
+.button:active{
+    transform: scale(1.1);
+    box-shadow: 0px 0px 0px #000;
+}
+
+.menu{
+    display: flex;
+    flex-direction: column;  
+    align-items: flex-start; 
+    
+    gap: 40px;               
+    
+    padding-left: 120px;     
+    
+    margin-top: 80px;      
+}
+
+.titulo-jogo {
+    font-family: 'Press Start 2P', cursive; /* Sua fonte pixel art */
+    font-size: 42px;             /* AUMENTAR A FONTE: Deixa o texto bem grande e destacado */
+    color: #ffffff;
+    line-height: 1.5;            /* Controla o espaçamento vertical entre as duas linhas */
+    
+    /* POSICIONAMENTO */
+    margin-top: 60px;            /* Afasta o título do topo da tela */
+    margin-left: 70%;            /* TRAZ PARA O MEIO: Empurra o título em direção ao centro da tela */
+    
+        
+    text-transform: uppercase;   /* Deixa tudo em maiúsculo (opcional, combina com pixel art) */
+
+    text-shadow: 4px 4px 0px #000000; 
+}
+
+.titulo-jogo::first-line {
+
+}
+
