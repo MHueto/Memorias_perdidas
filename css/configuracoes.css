@@ -1,0 +1,15 @@
+/* REMOVED .modal-overlay from here to move to style.css as it is a global component */
+.modal-conteudo{
+    background: #222;
+    color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    width: 320px;
+}
+
+
+.config-item{
+    display: flex;
+    justify-content: space-between;
+    margin: 12px 0;
+}

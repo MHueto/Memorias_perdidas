@@ -6,28 +6,90 @@
     <title>Document</title>
 
     <link rel="stylesheet" href="css/style.css">
-
+    <link rel="stylesheet" href="css/configuracoes.css">
 
 </head>
 <body>
-    
+
+    <button id="btn-mudo" class="btn-mudo">🔊</button>
+
 <main class="conteudo">
     <h1 class="titulo-jogo">Memorias <br>
         perdidas</h1>
-    
-    
+
+
     <nav class="menu">
-        <button class="button b1">Jogar</button>
+        <button id="btn-jogar" class="button b1">Jogar</button>
         <br><br>
         <button class="button b2">Configurações</button>
         <br><br>
-        <button class="button b3">Sair</button>
+        <button class="button b3">Controles</button>
     </nav>
 </main>
 
-    
+    <div id="notificacao-controles" class="notificacao">
+       <h3>Controles</h3>
+       <p>⬅️ ➡️ : mover</p>
+       <p>⬆️ : pular</p>
+       <p>Espaço : atacar e/ou interagir</p>
+    </div>
 
+
+    <div id="modal-config" class="modal-overlay">
+        <div class="modal-conteudo">
+            <h2>Configurações</h2>
+
+            <div class="config-item">
+                <label>Volume</label>
+                <input type="range" id="volume" name="volume" min="0" max="100">
+            </div>
+
+            <div class="config-item">
+                <label>Mover Esquerda</label>
+                <button class="rebind-btn" data-acao="esquerda">←</button>
+            </div>
+
+            <div class="config-item">
+                <label>Mover Direita</label>
+                <button class="rebind-btn" data-acao="direita">→</button>
+            </div>
+
+            <div class="config-item">
+                <label>Pular</label>
+                <button class="rebind-btn" data-acao="pular">↑</button>
+            </div>
+
+            <button class="fechar-config">Fechar</button>
+        </div>
+    </div>
+
+    <!-- MODAL JOGAR -->
+    <div id="modal-jogar" class="modal-overlay">
+        <div class="modal-menu-jogar">
+            <button class="button btn-continuar">Continuar</button>
+            <button class="button btn-novo-jogo">Novo Jogo</button>
+            <button class="button fechar-modal">Voltar</button>
+        </div>
+    </div>
+
+    <!-- MODAL SLOTS -->
+    <div id="modal-slots" class="modal-overlay">
+        <div class="modal-conteudo">
+            <h2>Escolha seu Jogo</h2>
+            <div class="config-item">
+                <button class="button slot-btn" data-slot="1">Jogo 1</button>
+            </div>
+            <div class="config-item">
+                <button class="button slot-btn" data-slot="2">Jogo 2</button>
+            </div>
+            <div class="config-item">
+                <button class="button slot-btn" data-slot="3">Jogo 3</button>
+            </div>
+            <button class="button fechar-modal">Voltar</button>
+        </div>
+    </div>
 
     <script src="js/main.js"></script>
+    <script src="js/configuracoes.js" defer></script>
 </body>
 </html>
