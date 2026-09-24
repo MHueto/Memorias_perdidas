@@ -1,5 +1,9 @@
 @import url('https://googleapis.com');
 
+:root {
+    color-scheme: dark;
+}
+
 *, ::before, ::after {
     margin: 0;
     padding: 0;
@@ -7,15 +11,43 @@
 }
 
 body{
-    background-image: url(/home/mateus/Documentos/memorias_perdidas/assets/images/background_img.jpeg);
-    background-size: cover;                  /* Igual ao object-fit: preenche a tela toda sem distorcer */
-    background-position: center;             /* Centraliza a imagem na tela */
-    background-repeat: no-repeat;            /* Impede que a imagem fique se repetindo */
-    background-attachment: fixed;            /* Faz a imagem ficar travada ao rolar a página (opcional) */
-    
-    
-    min-height: 100vh;                       /* Garante que o fundo cubra pelo menos 100% da altura da tela */
+    min-height: 100vh;
+    overflow-x: hidden;
+    background: #05080f;
     font-family: sans-serif;
+}
+
+.menu-background {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background: #05080f url('../assets/images/background_img.jpeg') center / cover no-repeat;
+    pointer-events: none;
+}
+
+.menu-background::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+    background:
+        linear-gradient(90deg, rgba(3, 7, 14, 0.84) 0%, rgba(3, 7, 14, 0.55) 37%, rgba(3, 7, 14, 0.36) 100%),
+        radial-gradient(circle at 82% 18%, rgba(0, 0, 0, 0.38), transparent 34%),
+        linear-gradient(180deg, rgba(2, 5, 12, 0.24), rgba(2, 5, 12, 0.62));
+}
+
+.menu-background__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1.1s linear;
+}
+
+.menu-background__video.is-visible {
+    opacity: 1;
 }
 
 .conteudo {
@@ -25,6 +57,12 @@ body{
     text-align: left;
     padding-top: 20vh;
     font-family: sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .menu-background__video {
+        transition: none;
+    }
 }
 
 .title{

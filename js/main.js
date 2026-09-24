@@ -35,8 +35,7 @@ btnJogar.addEventListener('click', () => {
 btnContinuar.addEventListener('click', () => {
     const ultimoSlot = gameSaves.lastSlot;
     if (ultimoSlot && gameSaves[ultimoSlot]) {
-        alert(`Continuando jogo do ${ultimoSlot}...`);
-        // Aqui você redirecionaria para a fase do jogo: window.location.href = 'game.html';
+        window.location.href = 'teste-escola.html';
     } else {
         alert('Nenhum jogo salvo para continuar! Comece um novo jogo.');
         modalJogar.classList.remove('ativo');
@@ -62,9 +61,8 @@ document.querySelectorAll('.slot-btn').forEach(btn => {
             }
         }
 
-        alert(`Iniciando Novo Jogo no ${slotId}!`);
         saveGameData(slotId, { level: 1, progress: 0 }); // Salvando dados iniciais
-        // window.location.href = 'game.html';
+        window.location.href = 'teste-escola.html';
     });
 });
 
