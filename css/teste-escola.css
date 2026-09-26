@@ -2,11 +2,14 @@
     color-scheme: dark;
     --night-ink: #020712;
     --night-blue: #07192a;
-    --stone-blue: #163149;
     --lamp-amber: #f1bd58;
-    --alert-red: #de4b47;
     --paper: #e9f1e7;
     --hud-dark: rgba(3, 12, 23, 0.88);
+    --scene-width: 1916px;
+    --scene-height: 821px;
+    --corridor-width: var(--scene-width);
+    --compact-room-width: 1054px;
+    --compact-room-height: 452px;
 }
 
 *,
@@ -29,6 +32,15 @@ body {
     font-family: "Courier New", Courier, monospace;
 }
 
+.game-shell,
+.game-viewport,
+.touch-controls,
+.touch-button {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
 button,
 a {
     font: inherit;
@@ -42,7 +54,7 @@ a:focus-visible,
 }
 
 .school-test {
-    min-height: 100vh;
+    min-height: 100dvh;
     padding: clamp(0px, 1.5vw, 20px);
     display: grid;
     place-items: center;
@@ -54,7 +66,7 @@ a:focus-visible,
 .game-shell {
     position: relative;
     width: min(100%, 1480px);
-    height: min(880px, calc(100vh - clamp(0px, 3vw, 40px)));
+    height: min(880px, calc(100dvh - clamp(0px, 3vw, 40px)));
     min-height: 520px;
     overflow: hidden;
     border: 4px solid #31526a;
@@ -71,7 +83,22 @@ a:focus-visible,
     overflow: hidden;
     cursor: crosshair;
     background: #020712;
-    touch-action: none;
+    touch-action: manipulation;
+}
+
+.game-viewport::before {
+    position: absolute;
+    z-index: 6;
+    inset: 0;
+    content: "";
+    pointer-events: none;
+    opacity: 0;
+    background: #020712;
+    transition: opacity 115ms ease-out;
+}
+
+.game-viewport.is-changing-scene::before {
+    opacity: 0.5;
 }
 
 .game-viewport::after {
@@ -80,7 +107,7 @@ a:focus-visible,
     inset: 0;
     content: "";
     pointer-events: none;
-    opacity: 0.2;
+    opacity: 0.16;
     background: repeating-linear-gradient(
         to bottom,
         rgba(218, 238, 224, 0.06) 0 1px,
@@ -91,62 +118,123 @@ a:focus-visible,
 
 .school-world {
     position: absolute;
-    top: 0;
+    top: 50%;
     left: 0;
-    width: 3344px;
-    height: 1882px;
+    width: var(--scene-width);
+    height: var(--scene-height);
+    transform: translate3d(0, -50%, 0);
     transform-origin: top left;
     will-change: transform;
 }
 
-.school-world__map {
+.school-world__background {
     position: absolute;
-    inset: 0;
-    overflow: hidden;
-    background: #020712;
-}
-
-.map-tile {
-    position: absolute;
-    display: block;
-    max-width: none;
-    height: auto;
-    image-rendering: pixelated;
-}
-
-.area-veil {
-    position: absolute;
-    z-index: 6;
-    inset: 0;
-    display: none;
+    inset: 0 auto auto 0;
     width: 100%;
-    height: 100%;
-    pointer-events: none;
+    height: var(--scene-height);
+    background-color: #020712;
     image-rendering: pixelated;
 }
 
-.edric {
+.school-world[data-area="outside"] .school-world__background {
+    background-image: url("../assets/images/escola/lado_de_fora_escola.png");
+    background-position: 0 0;
+    background-size: var(--scene-width) var(--scene-height);
+    background-repeat: no-repeat;
+}
+
+.school-world[data-area="inside"] .school-world__background {
+    width: var(--corridor-width);
+    background-color: #020712;
+    background-image: url("../assets/images/escola/escola_por_dentro_completa.png");
+    background-position: 0 0;
+    background-repeat: no-repeat;
+}
+
+.school-world[data-area="gym"] .school-world__background {
+    background-image: url("../assets/images/escola/quadra.png");
+    background-position: left center;
+    background-size: var(--compact-room-width) var(--compact-room-height);
+    background-repeat: no-repeat;
+}
+
+.school-world[data-area="classroom"] .school-world__background {
+    background-image: url("../assets/images/escola/sala_de_aula.png");
+    background-position: left center;
+    background-size: var(--compact-room-width) var(--compact-room-height);
+    background-repeat: no-repeat;
+}
+
+.school-world__lost-phone {
+    position: absolute;
+    z-index: 3;
+    top: 508px;
+    left: 501px;
+    width: 68px;
+    height: 39px;
+    display: none;
+    pointer-events: none;
+    background: url("../assets/images/itens/celular-perdido-lateral-pixelart.png") center / contain no-repeat;
+    image-rendering: pixelated;
+    opacity: 1;
+    filter: brightness(1.16) saturate(1.25) contrast(1.08) drop-shadow(0 1px 0 rgba(0, 0, 0, 0.42)) drop-shadow(0 0 2px rgba(74, 135, 214, 0.45));
+}
+
+.school-world[data-area="classroom"] .school-world__lost-phone {
+    display: block;
+}
+
+.school-world.has-collected-phone .school-world__lost-phone {
+    display: none;
+}
+
+.school-world__entry {
+    position: absolute;
+    z-index: 2;
+    top: 458px;
+    left: 856px;
+    width: 208px;
+    height: 195px;
+    display: grid;
+    place-items: end center;
+    padding-bottom: 8px;
+    opacity: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center bottom, rgba(241, 189, 88, 0.34), transparent 66%);
+    transition: opacity 130ms ease-out;
+}
+
+.school-world__entry span {
+    padding: 5px 8px;
+    border: 1px solid rgba(255, 231, 168, 0.75);
+    background: rgba(3, 12, 23, 0.84);
+    color: #ffe5a8;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-shadow: 1px 1px 0 #000;
+}
+
+.school-world[data-area="inside"] .school-world__entry {
+    display: none;
+}
+
+.school-world.is-near-entry .school-world__entry {
+    opacity: 1;
+}
+
+.renato {
     position: absolute;
     z-index: 4;
-    width: 72px;
-    height: 72px;
+    width: 90px;
+    height: 90px;
     background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
-    image-rendering: auto;
-    opacity: 0.96;
-    filter: brightness(0.82) saturate(0.76) contrast(0.96) drop-shadow(0 6px 0 rgba(0, 0, 0, 0.52));
-    will-change: transform, background-image;
-}
-
-.school-world__awning {
-    position: absolute;
-    z-index: 5;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
+    background-position: 0 100%;
+    background-size: 500% 200%;
     image-rendering: pixelated;
+    opacity: 0.98;
+    filter: brightness(0.87) saturate(0.78) contrast(1.04) drop-shadow(0 7px 0 rgba(0, 0, 0, 0.52));
+    will-change: transform, background-position;
 }
 
 .game-hud {
@@ -159,6 +247,17 @@ a:focus-visible,
     align-items: flex-start;
     gap: 10px;
     pointer-events: none;
+}
+
+/* Durante o jogo, deixa a imagem livre: informações de depuração e instruções
+   só poluíam a tela e não são necessárias para usar os controles. */
+.game-hud {
+    right: auto;
+}
+
+.hud-card,
+.game-help {
+    display: none;
 }
 
 .game-hud > * {
@@ -249,6 +348,208 @@ a:focus-visible,
     margin: 4px 0 0;
 }
 
+/* A regra fica depois dos estilos-base para prevalecer também em telas largas. */
+.hud-card,
+.game-help {
+    display: none;
+}
+
+.story-dialogue {
+    position: absolute;
+    z-index: 20;
+    inset: 0;
+    padding: 18px;
+    display: grid;
+    align-items: end;
+    pointer-events: none;
+}
+
+.story-dialogue[hidden] {
+    display: none;
+}
+
+.story-dialogue__box {
+    position: relative;
+    width: min(100%, 1080px);
+    aspect-ratio: 4.25 / 1;
+    margin: 0 auto;
+    pointer-events: auto;
+    background: url("../assets/images/caixa_dialogo.png") center / 100% auto no-repeat;
+    filter: drop-shadow(0 7px 0 rgba(0, 0, 0, 0.42));
+    image-rendering: pixelated;
+}
+
+.story-dialogue__speaker {
+    position: absolute;
+    top: clamp(16px, 2.25vw, 25px);
+    left: clamp(70px, 7.4vw, 99px);
+    color: #f6f2d8;
+    font-size: clamp(0.7rem, 1.1vw, 0.9rem);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-shadow: 1px 1px 0 rgba(18, 49, 41, 0.88);
+}
+
+.story-dialogue__text {
+    position: absolute;
+    top: clamp(70px, 7.8vw, 85px);
+    left: clamp(72px, 7.6vw, 104px);
+    right: clamp(72px, 9vw, 128px);
+    margin: 0;
+    color: #1b2b36;
+    font-size: clamp(0.86rem, 1.45vw, 1.14rem);
+    font-weight: 700;
+    line-height: 1.45;
+    text-shadow: 1px 1px 0 rgba(255, 255, 245, 0.7);
+}
+
+.story-dialogue__continue {
+    position: absolute;
+    right: clamp(88px, 10vw, 132px);
+    bottom: clamp(17px, 2.2vw, 27px);
+    min-width: 116px;
+    min-height: 44px;
+    padding: 7px 11px;
+    border: 1px solid rgba(38, 83, 57, 0.65);
+    background: rgba(244, 239, 211, 0.58);
+    color: #1e543c;
+    cursor: pointer;
+    font-size: clamp(0.68rem, 1vw, 0.78rem);
+    font-weight: 700;
+    text-shadow: 1px 1px 0 rgba(255, 255, 245, 0.76);
+    box-shadow: 1px 1px 0 rgba(34, 63, 51, 0.3);
+}
+
+.story-dialogue__continue:hover,
+.story-dialogue__continue:focus-visible {
+    background: rgba(215, 238, 190, 0.92);
+    border-color: #1d6544;
+}
+
+.story-dialogue__continue:active {
+    transform: translate(1px, 1px);
+    box-shadow: none;
+}
+
+.phone-message {
+    position: absolute;
+    z-index: 30;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    background: rgba(1, 10, 20, 0.48);
+}
+
+.phone-message[hidden] {
+    display: none;
+}
+
+.phone-message__device {
+    position: relative;
+    width: min(88vw, 430px);
+    aspect-ratio: 2 / 3;
+    background: url("../assets/images/itens/celular-desbloqueado-pixelart.png") center / contain no-repeat;
+    filter: drop-shadow(0 12px 14px rgba(0, 0, 0, 0.66));
+    image-rendering: pixelated;
+}
+
+.phone-message__content {
+    position: absolute;
+    top: 20%;
+    right: 22%;
+    bottom: 25%;
+    left: 22%;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(10px, 2vw, 16px);
+    color: #d9fff6;
+}
+
+.phone-message__title {
+    color: #9cf6e5;
+    font-size: clamp(0.62rem, 1.3vw, 0.82rem);
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-shadow: 1px 1px 0 rgba(0, 18, 30, 0.9);
+}
+
+.phone-message__text {
+    margin: 0;
+    color: #e8fffb;
+    font-size: clamp(0.78rem, 1.6vw, 1rem);
+    font-weight: 700;
+    line-height: 1.52;
+    text-shadow: 1px 1px 0 rgba(0, 14, 25, 0.9);
+}
+
+.phone-message__continue {
+    min-width: 116px;
+    min-height: 44px;
+    margin-top: auto;
+    align-self: flex-end;
+    padding: 8px 12px;
+    border: 1px solid rgba(121, 239, 221, 0.88);
+    background: rgba(3, 46, 60, 0.86);
+    color: #dffff7;
+    cursor: pointer;
+    font: inherit;
+    font-size: clamp(0.68rem, 1.15vw, 0.78rem);
+    font-weight: 700;
+    text-shadow: 1px 1px 0 #00131f;
+    box-shadow: 2px 2px 0 rgba(0, 8, 17, 0.62);
+}
+
+.phone-message__continue:hover,
+.phone-message__continue:focus-visible {
+    border-color: #e5fff9;
+    background: rgba(16, 98, 108, 0.94);
+}
+
+.phone-message__continue:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 rgba(0, 8, 17, 0.62);
+}
+
+.travel-cutscene {
+    position: absolute;
+    z-index: 40;
+    inset: 0;
+    display: grid;
+    overflow: hidden;
+    background: #000;
+}
+
+.travel-cutscene[hidden] {
+    display: none;
+}
+
+.travel-cutscene__scene {
+    position: absolute;
+    inset: 0;
+    background: url("../assets/images/cutscene-carro-cofre-pixelart.png") center / cover no-repeat;
+    image-rendering: pixelated;
+    animation: travel-cutscene-drive 5s linear 1.1s both;
+}
+
+.travel-cutscene::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #000;
+    opacity: 0;
+    transition: opacity 800ms ease;
+}
+
+.travel-cutscene.is-black::after {
+    opacity: 1;
+}
+
+@keyframes travel-cutscene-drive {
+    from { transform: scale(1) translateX(0); }
+    to { transform: scale(1.045) translateX(-0.7%); }
+}
+
 kbd {
     min-width: 19px;
     margin-right: 2px;
@@ -269,11 +570,11 @@ kbd {
     right: 14px;
     bottom: 14px;
     width: 152px;
-    height: 152px;
+    height: 44px;
     display: none;
     grid-template-columns: repeat(3, 44px);
-    grid-template-rows: repeat(3, 44px);
     gap: 8px;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .touch-button {
@@ -283,12 +584,12 @@ kbd {
     color: var(--paper);
     cursor: pointer;
     font-size: 1.2rem;
+    touch-action: none;
 }
 
-.touch-button--up { grid-column: 2; grid-row: 1; }
-.touch-button--left { grid-column: 1; grid-row: 2; }
-.touch-button--down { grid-column: 2; grid-row: 2; }
-.touch-button--right { grid-column: 3; grid-row: 2; }
+.touch-button--enter {
+    color: #ffdea2;
+}
 
 noscript {
     position: fixed;
@@ -300,13 +601,11 @@ noscript {
 }
 
 @media (max-width: 850px) {
-    .school-test {
-        padding: 0;
-    }
+    .school-test { padding: 0; }
 
     .game-shell {
         width: 100vw;
-        height: 100vh;
+        height: 100dvh;
         min-height: 0;
         border: 0;
         box-shadow: none;
@@ -326,31 +625,166 @@ noscript {
         min-width: 0;
     }
 
-    .hud-card--map {
-        min-width: 0;
+    .hud-card--map { min-width: 0; }
+    .game-help { display: none; }
+    .touch-controls { display: grid; }
+
+    .story-dialogue { padding: 12px; }
+
+    .story-dialogue__box {
+        width: min(100%, 680px);
     }
 
-    .game-help {
-        display: none;
+    .phone-message {
+        padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
     }
 
-    .touch-controls {
-        display: grid;
+    .phone-message__device {
+        width: min(90vw, 390px, calc((100dvh - 32px) * 2 / 3));
     }
 }
 
 @media (max-width: 560px) {
-    .hud-card--map {
-        display: none;
-    }
+    .hud-card--map { display: none; }
 
     .hud-card--status {
         width: 100%;
         padding: 7px 9px;
     }
 
-    .edric {
-        width: 66px;
-        height: 66px;
+    .story-dialogue {
+        padding: 12px;
     }
+
+    .story-dialogue__box {
+        width: 100%;
+        min-height: 178px;
+        aspect-ratio: 2.25 / 1;
+        background-size: 100% 100%;
+    }
+
+    .story-dialogue__speaker {
+        top: 16px;
+        left: 28px;
+        font-size: 0.76rem;
+    }
+
+    .story-dialogue__text {
+        top: 46px;
+        right: 28px;
+        left: 28px;
+        font-size: clamp(0.82rem, 3.6vw, 0.95rem);
+        line-height: 1.38;
+    }
+
+    .story-dialogue__continue {
+        right: 28px;
+        bottom: 14px;
+        min-width: 110px;
+        min-height: 44px;
+        padding: 7px 9px;
+        font-size: 0.72rem;
+    }
+
+    .phone-message__device {
+        width: min(80vw, 310px, calc((100dvh - 44px) * 2 / 3));
+    }
+
+    .phone-message__content {
+        top: 18%;
+        right: 19%;
+        bottom: 19%;
+        left: 19%;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 8px;
+    }
+
+    .phone-message__title {
+        font-size: clamp(0.7rem, 3vw, 0.82rem);
+        letter-spacing: 0.1em;
+    }
+
+    .phone-message__text {
+        font-size: clamp(0.72rem, 3vw, 0.84rem);
+        line-height: 1.38;
+    }
+
+    .phone-message__continue {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        min-width: 0;
+        min-height: 48px;
+        margin-top: 0;
+        align-self: stretch;
+        padding: 8px;
+        touch-action: manipulation;
+        font-size: 0.72rem;
+    }
+
+    .travel-cutscene__scene {
+        background-size: contain;
+    }
+}
+
+@media (max-width: 560px) and (orientation: landscape) {
+    .phone-message {
+        padding: 10px 60px;
+    }
+
+    .phone-message__device {
+        width: min(100%, 460px);
+        height: min(100%, 220px);
+        aspect-ratio: auto;
+        border: 2px solid rgba(121, 239, 221, 0.9);
+        background: #063142;
+        box-shadow: 4px 4px 0 rgba(0, 8, 17, 0.8), inset 0 0 0 3px #071c2b;
+        filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.58));
+    }
+
+    .phone-message__device::before {
+        position: absolute;
+        inset: 6px;
+        content: "";
+        pointer-events: none;
+        border: 1px solid rgba(156, 246, 229, 0.45);
+    }
+
+    .phone-message__content {
+        inset: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 128px;
+        grid-template-rows: auto 1fr;
+        gap: 8px 14px;
+        padding: 16px 18px;
+    }
+
+    .phone-message__title {
+        grid-column: 1 / -1;
+        font-size: 0.72rem;
+    }
+
+    .phone-message__text {
+        grid-column: 1;
+        grid-row: 2;
+        font-size: 0.75rem;
+        line-height: 1.35;
+        overflow-wrap: normal;
+    }
+
+    .phone-message__continue {
+        grid-column: 2;
+        grid-row: 2;
+        align-self: end;
+        min-height: 48px;
+        font-size: 0.72rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+.game-viewport::before,
+    .school-world__entry { transition: none; }
+    .renato { filter: brightness(0.9) saturate(0.8) contrast(1); }
+    .travel-cutscene__scene { animation: none; }
 }

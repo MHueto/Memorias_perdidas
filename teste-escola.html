@@ -4,49 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#020712">
-    <title>Memórias Perdidas — Teste da escola</title>
+    <title>Memórias Perdidas — Chegada ao COTIL</title>
     <link rel="stylesheet" href="css/teste-escola.css">
 </head>
 <body class="school-test-body">
-    <main class="school-test" aria-label="Teste de exploração da escola">
+    <main class="school-test" aria-label="Teste de exploração lateral da escola">
         <section class="game-shell">
-            <div id="gameViewport" class="game-viewport" tabindex="0" role="application" aria-label="Mapa da escola. Use as setas ou WASD para mover Edric.">
-                <div id="schoolWorld" class="school-world" aria-hidden="true">
-                    <div id="mapTiles" class="school-world__map" aria-hidden="true"></div>
-                    <canvas id="areaVeil" class="area-veil" aria-hidden="true"></canvas>
-                    <div id="edric" class="edric"></div>
-                    <canvas id="awningLayer" class="school-world__awning" aria-hidden="true"></canvas>
+            <div id="gameViewport" class="game-viewport" tabindex="0" role="application" aria-label="Escola em visão lateral. Use A e D ou as setas para mover Renato. Em frente à escada, pressione W ou seta para cima para entrar na escola. Espaço faz Renato pular.">
+                <div id="schoolWorld" class="school-world school-world--side" data-area="outside" aria-hidden="true">
+                    <div class="school-world__background"></div>
+                    <div class="school-world__entry" aria-hidden="true"><span>ENTRADA</span></div>
+                    <div class="school-world__lost-phone" aria-hidden="true"></div>
+                    <div id="renato" class="renato"></div>
                 </div>
             </div>
 
             <header class="game-hud">
                 <a class="hud-button hud-button--back" href="index.html">&larr; Menu</a>
                 <div class="hud-card hud-card--status" aria-live="polite">
-                    <span class="hud-label">Teste de animação</span>
-                    <strong id="playerState">Edric parado — olhando para cima</strong>
+                    <span class="hud-label">Chegada à escola</span>
+                    <strong id="playerState">Renato parado — olhando para direita</strong>
                 </div>
                 <div class="hud-card hud-card--map" aria-live="polite">
-                    <span class="hud-label">Portas liberadas</span>
-                    <strong id="explorationStatus">Lendo mapa…</strong>
+                    <span class="hud-label">Cena</span>
+                    <strong id="explorationStatus">Lado de fora</strong>
                 </div>
             </header>
 
             <aside class="game-help" aria-label="Controles">
                 <span class="help-mark">MOVIMENTO</span>
-                <p><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> ou <kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd></p>
-                <p><kbd>Shift</kbd> corre &nbsp;•&nbsp; câmera fixa em 185%</p>
+                <p><kbd>A</kbd><kbd>D</kbd> ou <kbd>←</kbd><kbd>→</kbd> para andar</p>
+                <p>Na escada: <kbd>W</kbd> ou <kbd>↑</kbd> para entrar</p>
+                <p>Na última porta do corredor: <kbd>W</kbd> ou <kbd>↑</kbd> para entrar na sala</p>
+                <p>Na ala 1, caminhe até a parede esquerda para sair</p>
+                <p><kbd>Espaço</kbd> para pular</p>
             </aside>
 
+            <div id="introDialogue" class="story-dialogue" role="dialog" aria-modal="true" aria-labelledby="introDialogueSpeaker" aria-describedby="introDialogueText" hidden>
+                <div class="story-dialogue__box">
+                    <span id="introDialogueSpeaker" class="story-dialogue__speaker">RENATO</span>
+                    <p id="introDialogueText" class="story-dialogue__text">Meu celular! Eu esqueci ele na sala. Preciso voltar para buscar.</p>
+                    <button id="introDialogueContinue" class="story-dialogue__continue" type="button">Continuar <span aria-hidden="true">↵</span></button>
+                </div>
+            </div>
+
+            <div id="phoneMessage" class="phone-message" role="dialog" aria-modal="true" aria-labelledby="phoneMessageTitle" aria-describedby="phoneMessageText" hidden>
+                <div class="phone-message__device">
+                    <div class="phone-message__content">
+                        <span id="phoneMessageTitle" class="phone-message__title">MENSAGENS</span>
+                        <p id="phoneMessageText" class="phone-message__text"></p>
+                        <button id="phoneMessageContinue" class="phone-message__continue" type="button">Continuar <span aria-hidden="true">↵</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="travelCutscene" class="travel-cutscene" role="img" aria-label="Renato viaja de carro rumo ao Cofre das Memórias." hidden>
+                <div class="travel-cutscene__scene"></div>
+            </div>
+
             <div class="touch-controls" aria-label="Controles na tela">
-                <button type="button" class="touch-button touch-button--up" data-direction="up" aria-label="Mover para cima">↑</button>
                 <button type="button" class="touch-button touch-button--left" data-direction="left" aria-label="Mover para esquerda">←</button>
-                <button type="button" class="touch-button touch-button--down" data-direction="down" aria-label="Mover para baixo">↓</button>
+                <button type="button" class="touch-button touch-button--enter" data-direction="enter" aria-label="Entrar na escola pela escada">↑</button>
                 <button type="button" class="touch-button touch-button--right" data-direction="right" aria-label="Mover para direita">→</button>
             </div>
         </section>
     </main>
 
-    <noscript>Ative o JavaScript para testar o movimento de Edric.</noscript>
+    <noscript>Ative o JavaScript para testar o movimento de Renato.</noscript>
     <script src="js/teste-escola.js"></script>
 </body>
 </html>
