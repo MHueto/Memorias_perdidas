@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#020712">
     <title>Memórias Perdidas — Chegada ao COTIL</title>
-    <link rel="stylesheet" href="css/teste-escola.css">
+    <link rel="stylesheet" href="css/teste-escola.css?v=cofre-roma-1">
 </head>
 <body class="school-test-body">
     <main class="school-test" aria-label="Teste de exploração lateral da escola">
@@ -14,7 +14,11 @@
                 <div id="schoolWorld" class="school-world school-world--side" data-area="outside" aria-hidden="true">
                     <div class="school-world__background"></div>
                     <div class="school-world__entry" aria-hidden="true"><span>ENTRADA</span></div>
+                    <div class="school-world__classroom-entry" aria-hidden="true"><span>SALA DE AULA<br>↑ ENTRAR</span></div>
+                    <div class="school-world__memory-entry" aria-hidden="true"><span>NÚCLEO DA MEMÓRIA<br>↑ ENTRAR</span></div>
                     <div class="school-world__lost-phone" aria-hidden="true"></div>
+                    <div id="lily" class="scene-npc scene-npc--lily" aria-hidden="true"></div>
+                    <div id="pedro" class="scene-npc scene-npc--pedro" aria-hidden="true"></div>
                     <div id="renato" class="renato"></div>
                 </div>
             </div>
@@ -62,6 +66,11 @@
                 <div class="travel-cutscene__scene"></div>
             </div>
 
+            <div id="memoryTransition" class="memory-transition" role="status" aria-live="assertive" hidden>
+                <div class="memory-transition__rift" aria-hidden="true"></div>
+                <p class="memory-transition__label">MEMÓRIA INSTÁVEL<br><span>QUEDA DE ROMA</span></p>
+            </div>
+
             <div class="touch-controls" aria-label="Controles na tela">
                 <button type="button" class="touch-button touch-button--left" data-direction="left" aria-label="Mover para esquerda">←</button>
                 <button type="button" class="touch-button touch-button--enter" data-direction="enter" aria-label="Entrar na escola pela escada">↑</button>
@@ -71,6 +80,6 @@
     </main>
 
     <noscript>Ative o JavaScript para testar o movimento de Renato.</noscript>
-    <script src="js/teste-escola.js"></script>
+    <script src="js/teste-escola.js?v=cofre-roma-1"></script>
 </body>
 </html>

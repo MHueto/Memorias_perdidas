@@ -8,6 +8,20 @@
     const SPEED = 310;
     const JUMP_SPEED = 690;
     const GRAVITY = 1850;
+    const PEDRO_WALK_DURATION = 2800;
+    const MEMORY_CORE_X = 850;
+    const MEMORY_CORE_RANGE = 138;
+
+    // COFRE DAS MEMÓRIAS — ALTURA DO RENATO POR ÁREA
+    // Cada corredor tem sua própria linha de piso. Diminua o valor para subir
+    // Renato; aumente para descer. Altere só a variável da sala que deseja ajustar.
+    const COFRE_ARQUIVO_INICIAL_CHAO_Y = 577; // corredor2.png
+    const COFRE_ESTANTES_NORTE_CHAO_Y = 560; // corredor1.png
+    const COFRE_SALA_REGISTROS_CHAO_Y = 565; // corredor4.png
+    const COFRE_ENCRUZILHADA_CHAO_Y = 564; // corredor6.png
+    const COFRE_PASSAGEM_CENTRAL_CHAO_Y = 563; // corredor3.png
+    const COFRE_ALA_LATERAL_CHAO_Y = 587; // corredor5.png
+    const COFRE_NUCLEO_FINAL_CHAO_Y = 576; // area_final_sem_cerca.png
 
     const scenes = {
         outside: {
@@ -28,17 +42,76 @@
         },
         gym: {
             width: COMPACT_ROOM_WIDTH,
-            floorY: 538,
+            floorY: 544,
             playerSize: DEFAULT_PLAYER_SIZE,
             startX: 130,
             label: 'Quadra da escola'
         },
         classroom: {
             width: COMPACT_ROOM_WIDTH,
-            floorY: 547,
+            floorY: 558,
             playerSize: DEFAULT_PLAYER_SIZE,
             startX: 145,
             label: 'Sala de aula'
+        },
+        vault: {
+            width: CORRIDOR_WIDTH,
+            floorY: COFRE_ARQUIVO_INICIAL_CHAO_Y,
+            playerSize: DEFAULT_PLAYER_SIZE,
+            startX: 138,
+            label: 'Cofre das Memórias — encontre a saída'
+        },
+        vaultFinal: {
+            width: 1672,
+            floorY: COFRE_NUCLEO_FINAL_CHAO_Y,
+            playerSize: DEFAULT_PLAYER_SIZE,
+            startX: 172,
+            label: 'Núcleo do Cofre das Memórias'
+        }
+    };
+
+    // A sequência é propositalmente diferente da ordem dos nomes dos arquivos.
+    // Cada ponta de corredor é uma escolha: algumas retornam ao caminho anterior
+    // e outras levam mais perto da sala final.
+    const VAULT_START_ROOM = 'arquivo-inicial';
+    const vaultRooms = {
+        'arquivo-inicial': {
+            asset: 'assets/images/cofre/corredor2.png',
+            left: 'estantes-norte',
+            right: 'sala-de-registros',
+            floorY: COFRE_ARQUIVO_INICIAL_CHAO_Y
+        },
+        'estantes-norte': {
+            asset: 'assets/images/cofre/corredor1.png',
+            left: 'arquivo-inicial',
+            right: 'ala-lateral',
+            floorY: COFRE_ESTANTES_NORTE_CHAO_Y
+        },
+        'sala-de-registros': {
+            asset: 'assets/images/cofre/corredor4.png',
+            left: 'arquivo-inicial',
+            right: 'encruzilhada',
+            floorY: COFRE_SALA_REGISTROS_CHAO_Y
+        },
+        encruzilhada: {
+            asset: 'assets/images/cofre/corredor6.png',
+            left: 'sala-de-registros',
+            right: 'passagem-central',
+            floorY: COFRE_ENCRUZILHADA_CHAO_Y,
+            backgroundSize: '1916px auto',
+            backgroundPosition: '0 90px'
+        },
+        'passagem-central': {
+            asset: 'assets/images/cofre/corredor3.png',
+            left: 'encruzilhada',
+            right: 'ala-lateral',
+            floorY: COFRE_PASSAGEM_CENTRAL_CHAO_Y
+        },
+        'ala-lateral': {
+            asset: 'assets/images/cofre/corredor5.png',
+            left: 'passagem-central',
+            right: 'final',
+            floorY: COFRE_ALA_LATERAL_CHAO_Y
         }
     };
 
@@ -49,27 +122,79 @@
     const playerState = document.querySelector('#playerState');
     const explorationStatus = document.querySelector('#explorationStatus');
     const introDialogue = document.querySelector('#introDialogue');
+    const introDialogueSpeaker = document.querySelector('#introDialogueSpeaker');
+    const introDialogueText = document.querySelector('#introDialogueText');
     const introDialogueContinue = document.querySelector('#introDialogueContinue');
     const phoneMessage = document.querySelector('#phoneMessage');
     const phoneMessageText = document.querySelector('#phoneMessageText');
     const phoneMessageContinue = document.querySelector('#phoneMessageContinue');
     const travelCutscene = document.querySelector('#travelCutscene');
+    const memoryTransition = document.querySelector('#memoryTransition');
 
-    const RENATO_SPRITE_SHEET = 'assets/images/renato/renato-walk-spritesheet-v2.png';
+    // Folha 2 × 8: oito poses para cada direção deixam o passo contínuo.
+    const RENATO_SPRITE_SHEET = 'assets/images/renato/renato-walk-spritesheet-v4.png';
+    const ROME_ENTRY_IMAGE = 'assets/images/roma/entrada-roma-pixelart-v1.png';
+    const SCENE_IMAGE_PATHS = [
+        'assets/images/escola/lado_de_fora_escola.png',
+        'assets/images/escola/escola_por_dentro_completa.png',
+        'assets/images/escola/quadra.png',
+        'assets/images/escola/sala_de_aula.png',
+        'assets/images/cofre/corredor1.png',
+        'assets/images/cofre/corredor2.png',
+        'assets/images/cofre/corredor3.png',
+        'assets/images/cofre/corredor4.png',
+        'assets/images/cofre/corredor5.png',
+        'assets/images/cofre/corredor6.png',
+        'assets/images/cofre/area_final_sem_cerca.png',
+        'assets/images/pedro-neves-sem-jaleco-v1.png',
+        'assets/images/pedro-neves-walk-right-v2.png',
+        'assets/images/pedro-neves-computador-costas-v1.png',
+        RENATO_SPRITE_SHEET
+    ];
+    const VAULT_IMAGE_PATHS = SCENE_IMAGE_PATHS.filter((path) => path.includes('/cofre/'));
+    const imagePreloadCache = new Map();
+
+    function preloadSceneImage(source) {
+        if (imagePreloadCache.has(source)) return imagePreloadCache.get(source);
+
+        const preload = new Promise((resolve) => {
+            const image = new Image();
+            const finish = () => resolve();
+            image.addEventListener('load', () => {
+                // decode evita revelar um PNG parcialmente desenhado em conexões lentas.
+                if (typeof image.decode === 'function') image.decode().catch(() => {}).finally(finish);
+                else finish();
+            }, { once: true });
+            image.addEventListener('error', finish, { once: true });
+            image.src = source;
+        });
+
+        imagePreloadCache.set(source, preload);
+        return preload;
+    }
+
+    const sceneImagesReady = Promise.all(SCENE_IMAGE_PATHS.map(preloadSceneImage));
+    const vaultImagesReady = Promise.all(VAULT_IMAGE_PATHS.map(preloadSceneImage));
     const sprites = {
         right: [
-            { id: 'right-idle', position: '0% 100%' },
-            { id: 'right-step-passing-a', position: '25% 100%' },
-            { id: 'right-step-left', position: '50% 100%' },
-            { id: 'right-step-passing-b', position: '75% 100%' },
-            { id: 'right-step-right', position: '100% 100%' }
+            { id: 'right-idle', position: '0% 0%' },
+            { id: 'right-step-contact-a', position: '14.2857% 0%' },
+            { id: 'right-step-down-a', position: '28.5714% 0%' },
+            { id: 'right-step-passing-a', position: '42.8571% 0%' },
+            { id: 'right-step-contact-b', position: '57.1429% 0%' },
+            { id: 'right-step-down-b', position: '71.4286% 0%' },
+            { id: 'right-step-passing-b', position: '85.7143% 0%' },
+            { id: 'right-step-return', position: '100% 0%' }
         ],
         left: [
-            { id: 'left-idle', position: '0% 0%' },
-            { id: 'left-step-passing-a', position: '25% 0%' },
-            { id: 'left-step-left', position: '50% 0%' },
-            { id: 'left-step-passing-b', position: '75% 0%' },
-            { id: 'left-step-right', position: '100% 0%' }
+            { id: 'left-idle', position: '0% 100%' },
+            { id: 'left-step-contact-a', position: '14.2857% 100%' },
+            { id: 'left-step-down-a', position: '28.5714% 100%' },
+            { id: 'left-step-passing-a', position: '42.8571% 100%' },
+            { id: 'left-step-contact-b', position: '57.1429% 100%' },
+            { id: 'left-step-down-b', position: '71.4286% 100%' },
+            { id: 'left-step-passing-b', position: '85.7143% 100%' },
+            { id: 'left-step-return', position: '100% 100%' }
         ]
     };
 
@@ -97,8 +222,31 @@
     const requestedPosition = testParameters.has('debugPosition') ? Number(testParameters.get('debugPosition')) : null;
     const shouldPlayIntro = !testParameters.has('debugArea') && !testParameters.has('debugPosition') && testParameters.get('intro') !== 'off';
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let introPhase = shouldPlayIntro ? (prefersReducedMotion ? 'dialogue-pending' : 'walking-away') : 'complete';
-    let introWalkTime = 0;
+    let introPhase = shouldPlayIntro ? 'lily-dialogue-pending' : 'complete';
+    const lilyDialogue = [
+        { speaker: 'LILY', text: 'Oi, Renato! Indo embora?' },
+        { speaker: 'RENATO', text: 'Oi, Lily. Eu estava… espera. Meu celular! Deixei ele na sala.' },
+        { speaker: 'LILY', text: 'Antes de voltar: você ficou sabendo do que aconteceu no Cofre das Memórias?' },
+        { speaker: 'RENATO', text: 'Cofre das Memórias? Nem sei o que é isso.' },
+        { speaker: 'LILY', text: 'É um lugar que preserva lembranças importantes. Disseram que alguém invadiu e algumas memórias foram alteradas.' },
+        { speaker: 'RENATO', text: 'Isso parece sério. Vou buscar meu celular primeiro.' },
+        { speaker: 'LILY', text: 'Vai lá. Talvez ele tenha alguma explicação.' }
+    ];
+    const pedroBriefing = [
+        { speaker: 'PEDRO NEVES', text: 'Renato. Ainda bem que você chegou.' },
+        { speaker: 'RENATO', text: 'Você é Pedro Neves? O que é este lugar?' },
+        { speaker: 'PEDRO NEVES', text: 'Este é o Cofre das Memórias. Aqui preservamos fragmentos de momentos históricos para que eles não se percam.' },
+        { speaker: 'PEDRO NEVES', text: 'A invasão alterou alguns fragmentos. Quando uma memória muda, o passado começa a se desfazer.' },
+        { speaker: 'RENATO', text: 'E o que eu tenho que fazer?' },
+        { speaker: 'PEDRO NEVES', text: 'Você vai entrar nas memórias instáveis, encontrar o ponto alterado e restaurá-lo sem mudar o resto da história.' },
+        { speaker: 'PEDRO NEVES', text: 'A primeira ruptura está na queda de Roma. Quando estiver pronto, use o núcleo para atravessar.' },
+        { speaker: 'RENATO', text: 'Entendi. Vou consertar isso.' }
+    ];
+    let storyDialogueOpen = false;
+    let storyDialogueLines = [];
+    let storyDialogueStep = 0;
+    let storyDialogueOnClose = null;
+    let finalBriefingStarted = false;
     const PHONE_POSITION_X = 535;
     const PHONE_INTERACTION_RANGE = 88;
     const phoneMessages = [
@@ -111,6 +259,12 @@
     let cutsceneActive = false;
     let cutsceneRevealTimer = 0;
     let cutsceneEndTimer = 0;
+    let cutsceneFinishTimer = 0;
+    let pedroWalkTimer = 0;
+    let memoryTransitionTimer = 0;
+    let memoryCoreReady = false;
+    let memoryTransitionActive = false;
+    let vaultRoomId = VAULT_START_ROOM;
 
     // URLs antigos de teste podiam abrir diretamente uma sala. O jogo sempre
     // começa na entrada; os parâmetros debugArea/debugPosition ficam reservados
@@ -120,7 +274,14 @@
     }
 
     const clamp = (value, minimum, maximum) => Math.min(Math.max(value, minimum), maximum);
-    const currentScene = () => scenes[currentArea];
+    const currentScene = () => {
+        if (currentArea !== 'vault') return scenes[currentArea];
+
+        return {
+            ...scenes.vault,
+            floorY: vaultRooms[vaultRoomId].floorY
+        };
+    };
 
     function getHorizontalMovement() {
         let direction = 0;
@@ -129,20 +290,114 @@
         return direction;
     }
 
-    function showIntroDialogue() {
-        introPhase = 'dialogue';
+    function updateStoryDialogue() {
+        const line = storyDialogueLines[storyDialogueStep];
+        if (!line) return;
+
+        introDialogueSpeaker.textContent = line.speaker;
+        introDialogueText.textContent = line.text;
+        introDialogueContinue.innerHTML = storyDialogueStep === storyDialogueLines.length - 1
+            ? 'Entendi <span aria-hidden="true">↵</span>'
+            : 'Continuar <span aria-hidden="true">↵</span>';
+    }
+
+    function openStoryDialogue(lines, onClose = null) {
+        storyDialogueLines = lines;
+        storyDialogueStep = 0;
+        storyDialogueOnClose = onClose;
+        storyDialogueOpen = true;
         player.moving = false;
         heldKeys.clear();
         jumpRequested = false;
+        updateStoryDialogue();
         introDialogue.hidden = false;
         introDialogueContinue.focus({ preventScroll: true });
     }
 
-    function closeIntroDialogue() {
-        if (introPhase !== 'dialogue') return;
-        introPhase = 'complete';
+    function closeStoryDialogue() {
+        if (!storyDialogueOpen) return;
+        storyDialogueOpen = false;
         introDialogue.hidden = true;
+        const onClose = storyDialogueOnClose;
+        storyDialogueOnClose = null;
+        onClose?.();
         viewport.focus({ preventScroll: true });
+    }
+
+    function continueStoryDialogue() {
+        if (!storyDialogueOpen) return;
+
+        if (storyDialogueStep < storyDialogueLines.length - 1) {
+            storyDialogueStep += 1;
+            updateStoryDialogue();
+            return;
+        }
+
+        closeStoryDialogue();
+    }
+
+    function startLilyDialogue() {
+        introPhase = 'dialogue';
+        openStoryDialogue(lilyDialogue, () => {
+            introPhase = 'complete';
+        });
+    }
+
+    function startPedroBriefing() {
+        if (finalBriefingStarted) return;
+        finalBriefingStarted = true;
+        openStoryDialogue(pedroBriefing, startPedroWalkToConsole);
+    }
+
+    function startPedroWalkToConsole() {
+        if (currentArea !== 'vaultFinal') return;
+
+        window.clearTimeout(pedroWalkTimer);
+        world.classList.remove('pedro-walking', 'pedro-at-console');
+
+        if (prefersReducedMotion) {
+            world.classList.add('pedro-at-console');
+            unlockMemoryCore();
+            return;
+        }
+
+        // Garante que a primeira pose seja exibida antes de iniciar o ciclo.
+        requestAnimationFrame(() => world.classList.add('pedro-walking'));
+        pedroWalkTimer = window.setTimeout(() => {
+            world.classList.remove('pedro-walking');
+            world.classList.add('pedro-at-console');
+            unlockMemoryCore();
+        }, PEDRO_WALK_DURATION);
+    }
+
+    function unlockMemoryCore() {
+        memoryCoreReady = true;
+        world.classList.add('is-memory-ready');
+        updateSceneLabel();
+    }
+
+    function startMemoryTransition() {
+        if (memoryTransitionActive || !memoryCoreReady || currentArea !== 'vaultFinal') return;
+
+        memoryTransitionActive = true;
+        player.moving = false;
+        heldKeys.clear();
+        jumpRequested = false;
+        memoryTransition.hidden = false;
+        world.classList.add('is-entering-memory');
+        requestAnimationFrame(() => memoryTransition.classList.add('is-active'));
+        updateSprite();
+
+        // O próximo cenário é carregado enquanto o núcleo cresce. Assim a página
+        // de Roma não aparece com fundo preto se a imagem ainda estiver decodificando.
+        const minimumTransition = new Promise((resolve) => {
+            window.clearTimeout(memoryTransitionTimer);
+            memoryTransitionTimer = window.setTimeout(resolve, prefersReducedMotion ? 180 : 1700);
+        });
+
+        Promise.all([preloadSceneImage(ROME_ENTRY_IMAGE), minimumTransition]).finally(() => {
+            window.location.assign('roma.html?intro=1');
+        });
     }
 
     function updatePhoneMessage() {
@@ -173,8 +428,23 @@
 
         window.clearTimeout(cutsceneRevealTimer);
         window.clearTimeout(cutsceneEndTimer);
+        window.clearTimeout(cutsceneFinishTimer);
         cutsceneRevealTimer = window.setTimeout(() => travelCutscene.classList.remove('is-black'), 1100);
         cutsceneEndTimer = window.setTimeout(() => travelCutscene.classList.add('is-black'), 6100);
+        cutsceneFinishTimer = window.setTimeout(() => {
+            // A tela preta só sai depois de todas as imagens do labirinto estarem
+            // prontas. Isso evita que Renato chegue a um cenário vazio.
+            vaultImagesReady.finally(beginVaultMaze);
+        }, 6900);
+    }
+
+    function beginVaultMaze() {
+        vaultRoomId = VAULT_START_ROOM;
+        cutsceneActive = false;
+        setArea('vault', scenes.vault.startX);
+        travelCutscene.hidden = true;
+        travelCutscene.classList.remove('is-black');
+        viewport.focus({ preventScroll: true });
     }
 
     function continuePhoneMessage() {
@@ -197,7 +467,9 @@
         const scene = currentScene();
         const playerSize = scene.playerSize;
         const frames = sprites[player.facing];
-        const frameIndex = player.moving && player.grounded ? 1 + (Math.floor(player.walkTime / 105) % 4) : 0;
+        // Sete poses de passo, além da pose parada, completam o ciclo sem saltos.
+        // Cada pose fica 130 ms na tela: um passo legível sem parecer lento.
+        const frameIndex = player.moving && player.grounded ? 1 + (Math.floor(player.walkTime / 130) % 7) : 0;
         const sprite = frames[frameIndex];
         if (sprite.id !== displayedSprite) {
             renato.style.backgroundImage = `url("${RENATO_SPRITE_SHEET}")`;
@@ -212,14 +484,16 @@
         const drawY = Math.round(scene.floorY - playerSize - player.height - PLAYER_VERTICAL_OFFSET);
         renato.style.transform = `translate(${drawX}px, ${drawY}px)`;
 
-        if (cutsceneActive) {
+        if (memoryTransitionActive) {
+            playerState.textContent = 'Renato está entrando na memória de Roma';
+        } else if (cutsceneActive) {
             playerState.textContent = 'Renato está a caminho do Cofre das Memórias';
         } else if (phoneMessageOpen) {
             playerState.textContent = 'Renato está lendo uma mensagem';
         } else if (phoneCollected) {
             playerState.textContent = 'Renato encontrou o celular';
-        } else if (introPhase === 'dialogue') {
-            playerState.textContent = 'Renato lembrou do celular';
+        } else if (storyDialogueOpen) {
+            playerState.textContent = 'Renato está conversando';
         } else if (!player.grounded) {
             playerState.textContent = `Renato pulando para ${player.facing === 'right' ? 'direita' : 'esquerda'}`;
         } else if (player.moving) {
@@ -259,6 +533,10 @@
             return 'Celular no chão — ↑ para pegar';
         }
 
+        if (currentArea === 'vaultFinal' && memoryCoreReady && Math.abs(player.x - MEMORY_CORE_X) <= MEMORY_CORE_RANGE) {
+            return 'Núcleo da memória — ↑ para entrar em Roma';
+        }
+
         return scene.label;
     }
 
@@ -272,15 +550,29 @@
         explorationStatus.textContent = label;
     }
 
-    function setArea(nextArea, spawnX = scenes[nextArea].startX) {
+    function updateVaultBackdrop() {
+        // A imagem é escolhida no CSS por atributo, em vez de depender de
+        // URLs guardadas em variáveis CSS. Assim o caminho dos PNGs continua
+        // correto mesmo quando a página é servida por outro endereço local.
+        world.dataset.vaultRoom = vaultRoomId;
+    }
+
+    function setArea(nextArea, spawnX = scenes[nextArea].startX, preserveHeldKeys = false) {
         currentArea = nextArea;
+        if (nextArea !== 'vaultFinal') {
+            window.clearTimeout(pedroWalkTimer);
+            world.classList.remove('pedro-walking', 'pedro-at-console', 'is-memory-ready', 'is-entering-memory');
+            memoryCoreReady = false;
+        }
+        if (nextArea === 'vault') updateVaultBackdrop();
+        else delete world.dataset.vaultRoom;
         const scene = currentScene();
         player.x = spawnX;
         player.height = 0;
         player.velocityY = 0;
         player.grounded = true;
         player.moving = false;
-        heldKeys.clear();
+        if (!preserveHeldKeys) heldKeys.clear();
         previousZoneLabel = '';
         world.dataset.area = nextArea;
         world.style.width = `${scene.width}px`;
@@ -294,9 +586,35 @@
         updateCamera();
     }
 
+    function travelVault(exitSide) {
+        const nextRoom = vaultRooms[vaultRoomId][exitSide];
+
+        if (nextRoom === 'final') {
+            setArea('vaultFinal');
+            window.setTimeout(startPedroBriefing, prefersReducedMotion ? 0 : 260);
+            return;
+        }
+
+        vaultRoomId = nextRoom;
+        const nextScene = currentScene();
+        const edgeInset = nextScene.playerSize / 2 + 100;
+        const spawnX = exitSide === 'right'
+            ? edgeInset
+            : nextScene.width - edgeInset;
+
+        // Mantém a direção pressionada: o corredor seguinte já começa fluido,
+        // sem exigir que a pessoa solte e aperte a tecla de novo.
+        setArea('vault', spawnX, true);
+    }
+
     function trySceneAction() {
-        if (introPhase !== 'complete' || phoneMessageOpen || cutsceneActive) return;
+        if (introPhase !== 'complete' || storyDialogueOpen || phoneMessageOpen || cutsceneActive) return;
         const scene = currentScene();
+
+        if (currentArea === 'vaultFinal' && memoryCoreReady && Math.abs(player.x - MEMORY_CORE_X) <= MEMORY_CORE_RANGE) {
+            startMemoryTransition();
+            return;
+        }
 
         if (currentArea === 'classroom' && !phoneCollected && Math.abs(player.x - PHONE_POSITION_X) <= PHONE_INTERACTION_RANGE) {
             openPhoneMessage();
@@ -313,39 +631,19 @@
         }
     }
 
-function update(deltaTime) {
-    if (introPhase === 'dialogue-pending') {
-        showIntroDialogue();
-        updateSceneLabel();
-        updateSprite();
-        updateCamera();
-        return;
-    }
-
-        const scene = currentScene();
-        const playerSize = scene.playerSize;
-
-        if (introPhase === 'walking-away') {
-            const introDirection = -1;
-            player.moving = true;
-            player.facing = 'left';
-            player.x = clamp(
-                player.x + introDirection * SPEED * (deltaTime / 1000),
-                playerSize / 2,
-                scene.width - playerSize / 2
-            );
-            player.walkTime += deltaTime;
-            introWalkTime += deltaTime;
-
-            if (introWalkTime >= 700) showIntroDialogue();
-
+    function update(deltaTime) {
+        if (introPhase === 'lily-dialogue-pending') {
+            startLilyDialogue();
             updateSceneLabel();
             updateSprite();
             updateCamera();
             return;
         }
 
-        if (introPhase === 'dialogue') {
+        const scene = currentScene();
+        const playerSize = scene.playerSize;
+
+        if (storyDialogueOpen) {
             player.moving = false;
             jumpRequested = false;
             updateSceneLabel();
@@ -363,7 +661,7 @@ function update(deltaTime) {
             return;
         }
 
-        if (cutsceneActive) {
+        if (cutsceneActive || memoryTransitionActive) {
             player.moving = false;
             jumpRequested = false;
             updateSceneLabel();
@@ -410,6 +708,18 @@ function update(deltaTime) {
             return;
         }
 
+        if (currentArea === 'vault') {
+            if (direction < 0 && reachedLeftEdge) {
+                travelVault('left');
+                return;
+            }
+
+            if (direction > 0 && reachedRightEdge) {
+                travelVault('right');
+                return;
+            }
+        }
+
         if (jumpRequested && player.grounded) {
             player.velocityY = JUMP_SPEED;
             player.grounded = false;
@@ -444,7 +754,7 @@ function update(deltaTime) {
         const entryKeys = ['arrowup', 'w'];
         const jumpKeys = [' '];
 
-        if (cutsceneActive) {
+        if (cutsceneActive || memoryTransitionActive) {
             if (movementKeys.includes(key) || entryKeys.includes(key) || jumpKeys.includes(key) || key === 'enter' || key === 'escape') {
                 event.preventDefault();
             }
@@ -457,9 +767,9 @@ function update(deltaTime) {
             return;
         }
 
-    if (introPhase === 'dialogue' && pressed && !event.repeat && (key === 'enter' || key === 'escape' || jumpKeys.includes(key))) {
+        if (storyDialogueOpen && pressed && !event.repeat && (key === 'enter' || key === 'escape' || jumpKeys.includes(key))) {
             event.preventDefault();
-            closeIntroDialogue();
+            continueStoryDialogue();
             return;
         }
 
@@ -495,7 +805,7 @@ function update(deltaTime) {
         });
         gameShell.addEventListener('contextmenu', (event) => event.preventDefault());
         gameShell.addEventListener('selectstart', (event) => event.preventDefault());
-        introDialogueContinue.addEventListener('click', closeIntroDialogue);
+        introDialogueContinue.addEventListener('click', continueStoryDialogue);
         phoneMessageContinue.addEventListener('click', continuePhoneMessage);
 
         document.querySelectorAll('[data-direction]').forEach((button) => {
@@ -504,7 +814,7 @@ function update(deltaTime) {
                 event.preventDefault();
                 button.setPointerCapture?.(event.pointerId);
 
-                if (introPhase !== 'complete' || phoneMessageOpen || cutsceneActive) return;
+                if (introPhase !== 'complete' || storyDialogueOpen || phoneMessageOpen || cutsceneActive || memoryTransitionActive) return;
 
                 if (direction === 'enter') trySceneAction();
                 else heldKeys.add(`arrow${direction}`);

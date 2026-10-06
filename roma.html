@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#111322">
+    <title>Memórias Perdidas — Queda de Roma</title>
+    <link rel="preload" as="image" href="assets/images/roma/entrada-roma-pixelart-v1.png">
+    <link rel="preload" as="image" href="assets/images/roma/foro-senado-pixelart-v1.png">
+    <link rel="preload" as="image" href="assets/images/roma/coliseu-exterior-pixelart-v1.png">
+    <link rel="preload" as="image" href="assets/images/roma/arena-coliseu-pixelart-v1.png">
+    <link rel="stylesheet" href="css/roma.css?v=roma-explore-4">
+</head>
+<body class="roma-page">
+    <main class="roma-game" aria-label="Memórias Perdidas: Queda de Roma">
+        <section class="roma-shell">
+            <div id="romaViewport" class="roma-viewport" tabindex="0" role="application" aria-label="Memória da Roma antiga em visão lateral. Use A e D ou as setas para mover Renato. Use W ou seta para cima para interagir. Use espaço para lançar o laço quando estiver equipado.">
+                <div id="romaWorld" class="roma-world" data-area="city" data-city-state="1" aria-hidden="true">
+                    <div id="romaBackground" class="roma-world__background"></div>
+                    <div id="romaAtmosphere" class="roma-world__atmosphere"></div>
+                    <div id="romaProps" class="roma-world__props"></div>
+                    <div id="romaNpcs" class="roma-world__npcs"></div>
+                    <div id="romaActors" class="roma-world__actors"></div>
+                    <div id="romaPrompt" class="roma-world__prompt"><span></span></div>
+                    <div id="renatoRoma" class="renato-roma"></div>
+                </div>
+            </div>
+
+            <header class="roma-hud">
+                <a class="roma-hud__back" href="teste-escola.html">&larr; Cofre</a>
+                <div class="roma-hud__objective" aria-live="polite">
+                    <span id="romaChapter">MEMÓRIA 01 — QUEDA DE ROMA</span>
+                    <strong id="romaObjective">Aguarde as instruções de Pedro.</strong>
+                </div>
+                <button id="romaReset" class="roma-hud__reset" type="button">Reiniciar Roma</button>
+                <button id="romaMap" class="roma-hud__reset" type="button" aria-label="Abrir mapa e locais visitados">Mapa · M</button>
+            </header>
+            <div id="romaRoute" class="roma-route" aria-live="polite"></div>
+            <div id="romaCombatStatus" class="roma-combat-status" hidden></div>
+            <div id="romaTransition" class="roma-transition" role="status" hidden></div>
+            <div id="romaCinemaCaption" class="roma-cinema-caption" hidden></div>
+            <button id="romaSkip" class="roma-skip" type="button" hidden>Pular · Enter</button>
+            <div id="romaMapPanel" class="roma-map" role="dialog" aria-modal="true" aria-labelledby="romaMapTitle" hidden>
+                <section class="roma-map__card">
+                    <h2 id="romaMapTitle">Caminhos de Roma</h2>
+                    <p>Mercado ↔ Foro ↔ Coliseu ↔ Arena<br>Rua dos artesãos ↔ Bairro · Oficina · Pátio</p>
+                    <p id="romaMapHint"></p>
+                    <p id="romaMapCount"></p>
+                    <p>Depois de conhecer um lugar, use este mapa para voltar até ele.</p>
+                    <div class="roma-map__locations"></div>
+                    <button id="romaCloseMap" type="button">Voltar ao jogo · Esc</button>
+                    <small>← → / A D: andar · Shift: correr · ↑ / E: interagir · Espaço: ação</small>
+                </section>
+            </div>
+
+            <aside id="inventory" class="inventory" aria-label="Itens de Renato" hidden>
+                <span class="inventory__title">ITENS</span>
+                <div id="inventoryItems" class="inventory__items"></div>
+            </aside>
+
+            <div id="romaToast" class="roma-toast" role="status" aria-live="polite" hidden></div>
+
+            <div id="romaDialogue" class="roma-dialogue" role="dialog" aria-modal="true" aria-labelledby="romaSpeaker" aria-describedby="romaDialogueText" hidden>
+                <div class="roma-dialogue__box">
+                    <span id="romaSpeaker" class="roma-dialogue__speaker">PEDRO NEVES</span>
+                    <p id="romaDialogueText" class="roma-dialogue__text"></p>
+                    <button id="romaDialogueContinue" class="roma-dialogue__continue" type="button">Continuar <span aria-hidden="true">↵</span></button>
+                </div>
+            </div>
+
+            <div id="craftPanel" class="craft-panel" role="dialog" aria-modal="true" aria-labelledby="craftTitle" hidden>
+                <div class="craft-panel__card">
+                    <span class="craft-panel__eyebrow">BANCADA DO ARTESÃO</span>
+                    <h2 id="craftTitle">Bonecos de palha</h2>
+                    <p>Use a palha para preparar distrações leves. Elas não duram muito, mas podem atrair animais.</p>
+                    <div class="craft-panel__actions">
+                        <button id="craftDolls" type="button">Fazer bonecos</button>
+                        <button id="closeCraft" type="button">Voltar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="endingPanel" class="ending-panel" role="dialog" aria-modal="true" aria-labelledby="endingTitle" hidden>
+                <div class="ending-panel__card">
+                    <span>MEMÓRIA 01 CONCLUÍDA</span>
+                    <h2 id="endingTitle">A queda começou aqui.</h2>
+                    <p>Renato recuperou o fragmento, mas suas escolhas transformaram uma ordem quebrada em pânico, abandono e conflito. Roma não caiu de uma só vez — ela começou a ceder diante dele.</p>
+                    <a href="teste-escola.html">Voltar ao Cofre</a>
+                    <button id="romaKeepExploring" type="button">Continuar explorando Roma</button>
+                </div>
+            </div>
+
+            <div class="roma-controls" aria-label="Controles na tela">
+                <button type="button" class="roma-controls__button" data-direction="left" aria-label="Mover para a esquerda">←</button>
+                <button type="button" class="roma-controls__button roma-controls__button--interact" data-direction="interact" aria-label="Interagir">↑</button>
+                <button type="button" class="roma-controls__button roma-controls__button--action" data-direction="action" aria-label="Usar ação ou lançar laço">AÇÃO</button>
+                <button type="button" class="roma-controls__button" data-direction="right" aria-label="Mover para a direita">→</button>
+            </div>
+        </section>
+    </main>
+
+    <noscript>Ative o JavaScript para jogar a memória de Roma.</noscript>
+    <script src="js/roma.js?v=roma-explore-4"></script>
+</body>
+</html>

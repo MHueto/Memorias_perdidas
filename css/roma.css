@@ -1,0 +1,316 @@
+:root {
+    --roma-paper: #f6efd5;
+    --roma-ink: #14212a;
+    --roma-night: #10111b;
+    --roma-ui: rgba(7, 16, 29, 0.9);
+    --roma-border: rgba(178, 232, 237, 0.78);
+    --roma-gold: #ffc86d;
+    --roma-cyan: #b6f5ff;
+    --roma-danger: #ff7b50;
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+    margin: 0;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 0%, #2a2231 0%, #11101a 58%, #07080f 100%);
+    color: var(--roma-paper);
+    font-family: "Courier New", monospace;
+}
+button, a { font: inherit; }
+button { touch-action: manipulation; }
+
+.roma-game { min-height: 100dvh; display: grid; place-items: center; padding: clamp(0px, 1.2vw, 18px); }
+.roma-shell {
+    position: relative;
+    width: min(100%, 1440px);
+    height: min(100dvh - 24px, 820px);
+    min-height: 0;
+    overflow: hidden;
+    border: 3px solid rgba(103, 158, 167, 0.74);
+    background: #090b13;
+    box-shadow: 0 0 0 3px #03050b, 12px 14px 0 rgba(0, 0, 0, 0.5);
+}
+.roma-viewport { position: absolute; inset: 0; overflow: hidden; outline: none; background: #0e101a; -webkit-tap-highlight-color: transparent; }
+.roma-viewport:focus-visible { box-shadow: inset 0 0 0 3px var(--roma-cyan); }
+.roma-viewport::after { position: absolute; z-index: 14; inset: 0; content: ""; pointer-events: none; background: linear-gradient(90deg, rgba(3, 6, 14, 0.38), transparent 16%, transparent 84%, rgba(3, 6, 14, 0.38)), linear-gradient(180deg, rgba(2, 4, 11, 0.05), transparent 48%, rgba(2, 4, 11, 0.3)); }
+
+.roma-world { position: absolute; top: 0; left: 0; transform-origin: top left; will-change: transform; }
+.roma-world__background { position: absolute; inset: 0; background-position: left top; background-size: 100% 100%; background-repeat: no-repeat; image-rendering: pixelated; }
+.roma-world[data-area="city"] .roma-world__background { background-image: url("../assets/images/roma/entrada-roma-pixelart-v1.png"); }
+.roma-world[data-area="forum"] .roma-world__background { background-image: url("../assets/images/roma/foro-senado-pixelart-v1.png"); }
+.roma-world[data-area="colosseum"] .roma-world__background { background-image: url("../assets/images/roma/coliseu-exterior-pixelart-v1.png"); }
+.roma-world[data-area="arena"] .roma-world__background { background-image: url("../assets/images/roma/arena-coliseu-pixelart-v1.png"); }
+.roma-world__atmosphere { position: absolute; z-index: 2; inset: 0; pointer-events: none; overflow: hidden; }
+.roma-world[data-city-state="2"] .roma-world__atmosphere { background: linear-gradient(90deg, rgba(98, 41, 20, 0.08), transparent 35%, rgba(38, 25, 22, 0.12)); }
+.roma-world[data-city-state="3"] .roma-world__atmosphere { background: linear-gradient(90deg, rgba(45, 30, 25, 0.28), transparent 28%, rgba(94, 36, 17, 0.23)), repeating-linear-gradient(112deg, transparent 0 130px, rgba(36, 18, 12, 0.16) 132px 147px); }
+.roma-world[data-city-state="4"] .roma-world__atmosphere,
+.roma-world[data-city-state="5"] .roma-world__atmosphere { background: radial-gradient(ellipse at 16% 18%, rgba(76, 72, 70, 0.54), transparent 24%), radial-gradient(ellipse at 72% 25%, rgba(89, 66, 50, 0.52), transparent 25%), linear-gradient(180deg, rgba(53, 26, 21, 0.26), rgba(14, 9, 11, 0.2)); animation: smoke-drift 6s ease-in-out infinite alternate; }
+.roma-world[data-city-state="5"] .roma-world__atmosphere::after { position: absolute; inset: 43% 0 0; content: ""; background: repeating-linear-gradient(90deg, transparent 0 120px, rgba(255, 69, 23, 0.2) 128px 145px, transparent 155px 265px); mix-blend-mode: screen; animation: fire-flicker 720ms steps(2,end) infinite; }
+
+.roma-world__props, .roma-world__npcs, .roma-world__actors { position: absolute; z-index: 4; inset: 0; pointer-events: none; }
+.roma-world__npcs { z-index: 5; }
+.roma-world__actors { z-index: 7; }
+
+.renato-roma { position: absolute; z-index: 9; width: 90px; height: 90px; background: url("../assets/images/renato/renato-walk-spritesheet-v4.png") 0 100% / 800% 200% no-repeat; image-rendering: pixelated; filter: brightness(0.94) saturate(0.84) contrast(1.06) drop-shadow(0 4px 1px rgba(0,0,0,.55)); will-change: transform, background-position; }
+
+.roma-npc {
+    position: absolute;
+    z-index: var(--npc-z, 3);
+    width: 94px;
+    height: 116px;
+    background-image: url("../assets/images/roma/npcs-romanos-pixel-v2.png");
+    background-repeat: no-repeat;
+    background-size: 400% 100%;
+    background-position: var(--npc-frame, 0%) center;
+    image-rendering: pixelated;
+    filter: brightness(0.94) saturate(0.86) contrast(1.06) drop-shadow(0 4px 1px rgba(0,0,0,.48));
+    animation: npc-idle 1.25s steps(2,end) infinite;
+}
+.roma-npc.is-walking { animation: npc-walk var(--npc-speed, 4.8s) linear infinite alternate; }
+.roma-npc.is-walking { filter: brightness(0.94) saturate(0.86) contrast(1.06) drop-shadow(0 4px 1px rgba(0,0,0,.48)); }
+.roma-world[data-city-state="3"] .roma-npc.is-walking { --npc-speed: 2.1s; }
+.roma-world[data-city-state="4"] .roma-npc.is-walking,
+.roma-world[data-city-state="5"] .roma-npc.is-walking { --npc-speed: 1.15s; }
+.roma-npc.is-talking { animation: npc-talk 680ms steps(2,end) infinite; }
+
+.roma-prop { position: absolute; z-index: 3; pointer-events: none; image-rendering: pixelated; }
+.roma-prop--marker { z-index: 8; width: 144px; height: 118px; display: grid; place-items: end center; padding-bottom: 6px; background: radial-gradient(ellipse at 50% 45%, rgba(255, 197, 98, 0.32), transparent 70%); animation: marker-pulse 1.2s steps(2,end) infinite; }
+.roma-prop--marker span, .roma-world__prompt span { padding: 5px 7px; border: 1px solid rgba(255,231,169,.85); background: rgba(19, 15, 20, .88); color: #fff0c9; font-size: .61rem; font-weight: 700; line-height: 1.25; letter-spacing: .06em; text-align: center; text-shadow: 1px 1px 0 #000; }
+.roma-prop--straw { width: 92px; height: 45px; border: 3px solid #6e421a; background: repeating-linear-gradient(12deg, #d9a33f 0 4px, #f3cf67 5px 8px, #91611d 9px 11px); box-shadow: 7px 7px 0 rgba(0,0,0,.22); transform: skewX(-9deg); }
+.roma-prop--bench { width: 115px; height: 52px; border: 4px solid #3a281f; background: linear-gradient(90deg,#6a4426 0 18%, #b27a39 19% 82%, #6a4426 83%); box-shadow: 0 27px 0 -9px #37241c, 0 30px 0 -8px #37241c; }
+.roma-prop--rope { width: 70px; height: 47px; border: 7px dotted #c29150; border-radius: 50%; transform: rotate(-15deg); }
+.roma-prop--doll { width: 34px; height: 56px; border: 3px solid #6e411e; background: repeating-linear-gradient(90deg,#d49b43 0 4px,#efc468 5px 8px); clip-path: polygon(35% 0,65% 0,70% 23%,100% 39%,89% 55%,73% 48%,70% 100%,30% 100%,27% 48%,11% 55%,0 39%,30% 23%); transform-origin: bottom center; }
+.roma-prop--barricade { width: 145px; height: 40px; border-top: 9px solid #704329; border-bottom: 9px solid #704329; background: repeating-linear-gradient(60deg,transparent 0 18px,#c57631 19px 28px,transparent 29px 45px); opacity: .95; }
+.roma-prop--memory { width: 42px; height: 56px; border: 3px solid #d7ffff; background: linear-gradient(135deg,#edfaff 0 28%,#54cfff 29% 52%,#1f60ff 53%); clip-path: polygon(50% 0,100% 50%,50% 100%,0 50%); box-shadow: 0 0 12px 5px #49d8ff, 0 0 28px 9px rgba(30,91,255,.63); animation: memory-float 1.2s steps(2,end) infinite; }
+.roma-prop--gate { width: 104px; height: 96px; border: 4px solid rgba(255,230,160,.65); background: radial-gradient(ellipse at center, rgba(255,188,73,.2), transparent 66%); }
+.roma-prop--senate { width: 120px; height: 115px; background: radial-gradient(ellipse at 50% 35%, rgba(242,231,183,.32), transparent 67%); }
+.roma-prop--military { width: 104px; height: 108px; background: radial-gradient(ellipse at 50% 42%, rgba(255,101,75,.29), transparent 67%); }
+.roma-prop--merchant { width: 114px; height: 104px; background: radial-gradient(ellipse at 50% 42%, rgba(255,193,76,.3), transparent 67%); }
+
+.roma-lion { position: absolute; width: 108px; height: 78px; z-index: 6; background: url("../assets/images/roma/leao-estilizado-pixel-v2.png") center / contain no-repeat; image-rendering: pixelated; filter: drop-shadow(0 4px 1px rgba(0,0,0,.45)); animation: lion-breathe 700ms steps(2,end) infinite; }
+.roma-lion.is-left { transform: scaleX(-1); }
+.roma-lion.is-hunting { animation: lion-hunt .55s steps(2,end) infinite; }
+.roma-lion.is-attacking { animation: lion-attack .42s steps(2,end) infinite; }
+.roma-lasso { position: absolute; z-index: 12; height: 0; border-top: 5px dashed #e6c786; transform-origin: left center; filter: drop-shadow(0 1px 0 #3d2614); opacity: 0; }
+.roma-lasso.is-thrown { animation: lasso-throw 920ms ease-out forwards; }
+.roma-reticle { position: absolute; z-index: 13; width: 54px; height: 54px; border: 3px dashed #dbffff; border-radius: 50%; box-shadow: 0 0 8px #3ed4ff; transform: translate(-50%, -50%); }
+.roma-reticle::before, .roma-reticle::after { position: absolute; content: ""; background: #e7ffff; }
+.roma-reticle::before { width: 2px; height: 62px; left: 23px; top: -7px; }
+.roma-reticle::after { width: 62px; height: 2px; top: 23px; left: -7px; }
+
+/* O corredor de observação fica diante da areia: Renato jamais entra na jaula. */
+.roma-world[data-area="arena"]::after {
+    position: absolute;
+    z-index: 10;
+    top: 626px;
+    left: 0;
+    width: 100%;
+    height: 130px;
+    content: "";
+    pointer-events: none;
+    background: repeating-linear-gradient(90deg, transparent 0 54px, #211b1a 55px 64px, transparent 65px 116px), linear-gradient(180deg, transparent 0 18px, #342621 19px 27px, transparent 28px 70px, #1c1617 71px 84px, rgba(12,10,12,.82) 85px 100%);
+    box-shadow: inset 0 9px 0 rgba(222,178,92,.24), 0 -2px 0 #160f0d;
+}
+.roma-world__prompt { position: absolute; z-index: 13; width: 170px; height: 100px; display: none; place-items: end center; padding-bottom: 6px; pointer-events: none; background: radial-gradient(ellipse at center, rgba(144,240,255,.25), transparent 70%); }
+.roma-world__prompt.is-visible { display: grid; }
+
+.roma-hud { position: absolute; z-index: 30; top: 14px; left: 14px; right: 14px; display: flex; align-items: flex-start; gap: 10px; pointer-events: none; }
+.roma-hud__back, .roma-hud__objective, .roma-hud__reset, .inventory, .roma-controls__button { border: 2px solid var(--roma-border); background: var(--roma-ui); box-shadow: 3px 3px 0 rgba(0,0,0,.47); }
+.roma-hud__back { min-width: 44px; min-height: 44px; display: inline-grid; place-items: center; padding: 0 12px; color: #ffdda1; text-decoration: none; font-size: .82rem; font-weight: 700; pointer-events: auto; }
+.roma-hud__objective { max-width: min(58vw, 510px); padding: 8px 11px; display: grid; gap: 3px; color: var(--roma-paper); text-shadow: 1px 1px 0 #000; }
+.roma-hud__objective span { color: #e9bd79; font-size: .59rem; font-weight: 700; letter-spacing: .1em; }
+.roma-hud__objective strong { font-size: .73rem; line-height: 1.36; }
+.roma-hud__reset { min-height: 44px; padding: 0 10px; color: #bfdde1; cursor: pointer; font-size: .66rem; font-weight: 700; pointer-events: auto; }
+.roma-hud__back:hover,.roma-hud__back:focus-visible,.roma-hud__reset:hover,.roma-hud__reset:focus-visible,.roma-controls__button:hover,.roma-controls__button:focus-visible { border-color: var(--roma-gold); background: rgba(41,31,25,.96); outline: none; }
+.roma-hud__back:active,.roma-hud__reset:active,.roma-controls__button:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 rgba(0,0,0,.47); }
+
+.inventory { position: absolute; z-index: 29; top: 76px; right: 14px; min-width: 156px; padding: 8px 10px; color: #edf4e5; }
+.inventory__title { color: #e9bd79; font-size: .6rem; font-weight: 700; letter-spacing: .12em; }
+.inventory__items { display: grid; gap: 4px; margin-top: 5px; }
+.inventory__item { display: flex; gap: 6px; align-items: center; font-size: .65rem; font-weight: 700; }
+.inventory__item::before { width: 9px; height: 9px; content: ""; border: 1px solid #e7f9dd; background: var(--item-color,#d9a33f); box-shadow: 1px 1px 0 #000; }
+.roma-toast { position: absolute; z-index: 40; top: 122px; left: 50%; max-width: min(82vw,520px); padding: 10px 13px; border: 2px solid #b7f3ed; background: rgba(4,31,39,.94); color: #e9fffb; font-size: .73rem; font-weight: 700; line-height: 1.35; text-align: center; transform: translateX(-50%); box-shadow: 4px 4px 0 rgba(0,0,0,.44); }
+.roma-toast[hidden] { display: none; }
+
+.roma-dialogue { position: absolute; z-index: 50; inset: 0; padding: 18px; display: grid; align-items: end; pointer-events: none; }
+.roma-dialogue[hidden] { display: none; }
+.roma-dialogue__box { position: relative; width: min(100%,1080px); aspect-ratio: 4.25 / 1; margin: 0 auto; pointer-events: auto; background: url("../assets/images/caixa_dialogo.png") center / 100% auto no-repeat; filter: drop-shadow(0 7px 0 rgba(0,0,0,.42)); image-rendering: pixelated; }
+.roma-dialogue__speaker { position:absolute; top:clamp(16px,2.25vw,25px); left:clamp(70px,7.4vw,99px); color:#f6f2d8; font-size:clamp(.7rem,1.1vw,.9rem); font-weight:700; letter-spacing:.14em; text-shadow:1px 1px 0 rgba(18,49,41,.88); }
+.roma-dialogue__text { position:absolute; top:clamp(70px,7.8vw,85px); right:clamp(72px,9vw,128px); left:clamp(72px,7.6vw,104px); margin:0; color:#1b2b36; font-size:clamp(.86rem,1.45vw,1.14rem); font-weight:700; line-height:1.45; text-shadow:1px 1px 0 rgba(255,255,245,.7); }
+.roma-dialogue__continue { position:absolute; right:clamp(88px,10vw,132px); bottom:clamp(17px,2.2vw,27px); min-width:116px; min-height:44px; padding:7px 11px; border:1px solid rgba(38,83,57,.65); background:rgba(244,239,211,.65); color:#1e543c; cursor:pointer; font-size:clamp(.68rem,1vw,.78rem); font-weight:700; box-shadow:1px 1px 0 rgba(34,63,51,.3); }
+.roma-dialogue__continue:hover,.roma-dialogue__continue:focus-visible { border-color:#1d6544; background:rgba(215,238,190,.96); outline:none; }
+.roma-dialogue__continue:active { transform:translate(1px,1px); box-shadow:none; }
+
+.craft-panel,.ending-panel { position:absolute; z-index:55; inset:0; display:grid; place-items:center; padding:18px; background:rgba(1,7,15,.62); }
+.craft-panel[hidden],.ending-panel[hidden] { display:none; }
+.craft-panel__card,.ending-panel__card { width:min(100%,510px); padding:24px; border:3px solid rgba(229,201,130,.86); background:rgba(21,19,24,.96); color:#f7efd9; box-shadow:8px 8px 0 rgba(0,0,0,.55); text-align:center; }
+.craft-panel__eyebrow,.ending-panel__card > span { color:#edc26d; font-size:.68rem; font-weight:700; letter-spacing:.12em; }
+.craft-panel h2,.ending-panel h2 { margin:10px 0; font-size:1.2rem; }
+.craft-panel p,.ending-panel p { margin:0; font-size:.8rem; line-height:1.6; }
+.craft-panel__actions { display:flex; justify-content:center; gap:10px; margin-top:18px; }
+.craft-panel button,.ending-panel a { min-width:128px; min-height:44px; padding:10px 12px; border:2px solid #d9b56b; background:#244535; color:#fff5d4; cursor:pointer; font-weight:700; text-decoration:none; }
+.craft-panel button + button { border-color:#89b9bd; background:#172b3a; }
+.craft-panel button:hover,.craft-panel button:focus-visible,.ending-panel a:hover,.ending-panel a:focus-visible { filter:brightness(1.15); outline:2px solid #e9ffff; outline-offset:2px; }
+.ending-panel__card a { display:inline-grid; place-items:center; margin-top:19px; }
+
+.roma-controls { position:absolute; z-index:31; right:14px; bottom:14px; display:grid; grid-template-columns:repeat(4,44px); gap:8px; }
+.roma-controls__button { width:44px; height:44px; padding:0; color:var(--roma-paper); cursor:pointer; font-size:1.16rem; }
+.roma-controls__button--interact { color:var(--roma-gold); }
+.roma-controls__button--action { font-size:.53rem; color:#c8faff; font-weight:700; }
+
+@keyframes npc-idle { 0%,100% { transform:translateY(0); } 50% { transform:translateY(1px); } }
+@keyframes npc-walk { from { transform:translateX(0) translateY(0); } to { transform:translateX(var(--walk,80px)) translateY(1px); } }
+@keyframes npc-talk { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-2px); } }
+@keyframes robe-step { 0%,100% { clip-path:polygon(0 0,100% 0,95% 100%,7% 100%); } 50% { clip-path:polygon(0 0,100% 0,100% 100%,0 100%); } }
+@keyframes marker-pulse { 0%,100% { opacity:.7; } 50% { opacity:1; } }
+@keyframes memory-float { 0%,100% { transform:translateY(0) rotate(0); } 50% { transform:translateY(-7px) rotate(5deg); } }
+@keyframes lion-breathe { 0%,100% { transform:translateY(0); } 50% { transform:translateY(2px); } }
+@keyframes lion-hunt { 0%,100% { transform:translateX(0) scale(1); } 50% { transform:translateX(8px) scale(1.04); } }
+@keyframes lion-attack { 0%,100% { transform:translateY(0) scale(1); } 50% { transform:translateY(4px) scale(1.11,.88); } }
+@keyframes lasso-throw { 0% { opacity:0; transform:scaleX(.05); } 15% { opacity:1; } 72% { opacity:1; transform:scaleX(1); } 100% { opacity:0; transform:scaleX(.18); } }
+@keyframes smoke-drift { from { transform:translateX(-8px); opacity:.76; } to { transform:translateX(9px); opacity:1; } }
+@keyframes fire-flicker { 0%,100% { opacity:.33; } 50% { opacity:.71; } }
+
+@media (max-width:620px) {
+    .roma-game { padding:0; }
+    .roma-shell { width:100vw; height:100dvh; min-height:0; border:0; box-shadow:none; }
+    .roma-hud { top:max(10px, env(safe-area-inset-top)); left:10px; right:10px; gap:7px; }
+    .roma-hud__objective { max-width:calc(100vw - 150px); padding:7px 9px; }
+    .roma-hud__objective strong { font-size:.64rem; }
+    .roma-hud__reset { min-width:44px; width:44px; padding:4px; font-size:.48rem; line-height:1.1; }
+    .inventory { top:74px; right:10px; min-width:130px; padding:7px 8px; }
+    .roma-toast { top:122px; font-size:.66rem; }
+    .roma-controls { right:10px; bottom:max(10px,env(safe-area-inset-bottom)); grid-template-columns:repeat(4,48px); gap:8px; }
+    .roma-controls__button { width:48px; height:48px; }
+    .roma-dialogue { padding:12px; }
+    .roma-dialogue__box { width:100%; min-height:178px; aspect-ratio:2.25 / 1; background-size:100% 100%; }
+    .roma-dialogue__speaker { top:16px; left:28px; font-size:.76rem; }
+    .roma-dialogue__text { top:46px; right:28px; left:28px; font-size:clamp(.8rem,3.55vw,.94rem); line-height:1.35; }
+    .roma-dialogue__continue { right:28px; bottom:14px; min-width:110px; min-height:44px; padding:7px 9px; font-size:.72rem; }
+    .craft-panel__card,.ending-panel__card { padding:19px; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+    *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; }
+}
+
+/* Motion v3: world position belongs to a wrapper; facing/frame belongs to its child. */
+[hidden] { display:none !important; }
+.roma-shell,.roma-controls { user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+.roma-controls__button { touch-action:none; }
+.roma-npc,.roma-npc.is-walking,.roma-npc.is-talking {
+    width:68px;height:90px;left:0;top:0;background:none;animation:none;filter:none;
+}
+.roma-npc__sprite {
+    width:100%;height:100%;background:url('../assets/images/roma/npcs-simple-a-v4.png') 0 0 / 400% 400% no-repeat;
+    image-rendering:pixelated;transform-origin:center;filter:brightness(.92) saturate(.82) drop-shadow(0 3px 0 #30221580);
+}
+.roma-npc::before,.roma-lion::before {
+    content:'';position:absolute;left:20%;right:20%;bottom:0;height:6px;background:#22190c52;border-radius:50%;
+}
+.roma-lion,.roma-lion.is-left,.roma-lion.is-hunting,.roma-lion.is-attacking {
+    width:144px;height:112px;left:0;top:0;background:none;animation:none;filter:none;
+}
+.roma-lion__sprite { width:100%;height:100%;background:url('../assets/images/roma/leao-walk-attack-v3.png') 0 0 / 400% 200% no-repeat; image-rendering:pixelated; }
+.roma-lion[data-state="windup"]::before { background:#bd713153; }
+.roma-lion[data-state="recoil"] .roma-lion__sprite { filter:brightness(1.12); }
+.roma-particle { position:absolute;width:4px;height:4px;background:#bcb09c;pointer-events:none; }
+.roma-particle.is-straw { width:7px;height:3px;background:#e7bb62; }
+.roma-claw-impact {position:absolute;width:28px;height:34px;pointer-events:none;}
+.roma-claw-impact::before {content:'';position:absolute;left:4px;top:0;width:3px;height:29px;background:#f5dfaa;box-shadow:9px 0 #f5dfaa,18px 0 #f5dfaa;transform:rotate(28deg);}
+.roma-prop--entrance {width:68px;height:99px;border-bottom:3px solid #e7c686;background:linear-gradient(0deg,#e9cc731f,transparent 65%);}
+.roma-prop--entrance span {position:absolute;bottom:107px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:5px 8px;background:#172229d9;border:1px solid #a7bbb3;color:#ffe5ac;font-size:11px;font-weight:bold;}
+.roma-prop--entrance.is-near span {visibility:hidden;}
+.roma-prop--forge-glow {width:180px;height:135px;opacity:.16;background:radial-gradient(ellipse,#ff9b43,transparent 70%);animation:fire-flicker 1.6s steps(3,end) infinite;mix-blend-mode:screen;}
+.roma-prop--echo {width:8px;height:8px;background:#ffe4aa;box-shadow:0 0 0 3px #a577383d,0 0 10px #f2d396;animation:marker-pulse 1.8s steps(2,end) infinite;}
+.ending-panel__card button {display:block;min-height:44px;width:100%;margin-top:12px;border:2px solid #95b4ac;background:#244535;color:#fff4d4;cursor:pointer;font-size:14px;font-weight:bold;padding:10px;}
+.roma-map__locations {grid-template-columns:1fr 1fr;}
+.roma-map__locations button {font-size:12px;line-height:1.4;}
+#romaMapHint {padding:10px;border-left:2px solid #cca661;background:#e3c17d0d;}
+#romaMapCount {font-size:12px;color:#e4c998;}
+@media(max-width:620px) { .roma-map__locations {grid-template-columns:1fr;} }
+.roma-world[data-area="arena"]::after {
+    z-index:3;top:677px;height:79px;
+    background:repeating-linear-gradient(0deg,transparent 0 23px,#332c2b 24px 26px),repeating-linear-gradient(90deg,#514942 0 65px,#2f2926 66px 69px,#494139 70px 128px);
+    box-shadow:inset 0 4px #8d7b5b,inset 0 9px #332b26;
+}
+.roma-prop--memory {background:none;border:0;clip-path:none;box-shadow:none;animation:none;}
+.roma-prop--memory.is-retrieved {background:#97e9ff;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:0 0 20px #74dfff;}
+.roma-lasso {border:0;height:5px;opacity:1;pointer-events:none;}
+.roma-lasso.is-thrown {animation:none;}
+.roma-lasso i {display:block;width:100%;height:100%;border-top:4px dashed #e6c786;opacity:0;transform-origin:left center;}
+.roma-lasso.is-thrown i {animation:lasso-throw 920ms ease-out forwards;}
+.roma-reticle.is-on-target {border-color:#ffe69b;box-shadow:0 0 0 3px #d3a75166;}
+.roma-prop--route {padding:6px 9px;background:#342821df;color:#f1ddb4;border:2px solid #896e47;font-size:13px;font-weight:bold;white-space:nowrap;}
+.roma-prop--destination {color:#ffdc88;font-size:28px;text-shadow:2px 2px #33251e;}
+.roma-world__prompt span {white-space:pre-line;font-size:12px;}
+.roma-route {position:absolute;z-index:25;left:16px;bottom:20px;color:#f2e2c4;font-size:12px;padding:8px 10px;background:#171c25c9;border-left:2px solid #a88d60;max-width:calc(100% - 250px);}
+.roma-combat-status {position:absolute;z-index:28;top:92px;left:50%;transform:translateX(-50%);background:#1e1927ee;padding:10px 14px;border:2px solid #bd9460;max-width:calc(100% - 24px);font-size:13px;text-align:center;}
+.roma-combat-status.is-ready {border-color:#ffdf96;color:#ffe8b1;}
+.roma-transition {position:absolute;inset:0;z-index:80;display:grid;place-items:center;background:#13141ff5;color:#f0d8a9;}
+.roma-map {position:absolute;inset:0;z-index:60;padding:16px;background:#0b101ade;display:grid;place-items:center;}
+.roma-map__card {width:min(540px,100%);max-height:100%;overflow:auto;padding:22px;background:#1d2029;border:2px solid #b29a68;box-shadow:6px 6px #0006;}
+.roma-map h2 {margin:0 0 12px;font-size:22px;}
+.roma-map p {font-size:13px;line-height:1.5;color:#d6ccb7;}
+.roma-map__locations {display:grid;gap:8px;margin:16px 0;}
+.roma-map button {min-height:44px;padding:10px 12px;background:#29333c;border:1px solid #83949b;color:#f5e4bb;text-align:left;cursor:pointer;}
+.roma-map button:hover:not(:disabled) {border-color:#ffdfa0;background:#3a4147;}
+.roma-map button:disabled {opacity:.45;cursor:default;}
+.roma-map small {display:block;margin-top:18px;line-height:1.5;color:#c2b69e;font-size:12px;}
+.roma-cinema-caption {position:absolute;z-index:42;bottom:32px;left:50%;transform:translateX(-50%);width:min(620px,90%);padding:10px;color:#f6e7c8;background:#15151dea;text-align:center;font-size:14px;}
+.roma-skip {position:absolute;z-index:43;right:16px;top:16px;min-height:44px;padding:8px 14px;background:#1d1b22;border:1px solid #e9c886;color:#f2dcaa;cursor:pointer;}
+.is-cinematic::before,.is-cinematic::after {content:'';position:absolute;left:0;right:0;height:24px;background:#0c0e16;z-index:39;pointer-events:none;}
+.is-cinematic::before {top:0;}.is-cinematic::after {bottom:0;}
+.is-cinematic .roma-hud,.is-cinematic .roma-controls,.is-cinematic .inventory,.is-cinematic .roma-combat-status,.is-cinematic .roma-route {visibility:hidden;}
+.has-modal .roma-controls {visibility:hidden;}
+.inventory {top:86px;min-width:0;padding:6px 8px;opacity:.92;}
+.inventory__items {gap:3px;}.inventory__item {font-size:11px;}
+.roma-hud__objective {flex:1;max-width:510px;}
+.roma-hud__reset {font-size:11px;}
+.roma-toast {top:145px;font-size:12px;}
+button:focus-visible,a:focus-visible {outline:2px solid #ffe09b;outline-offset:3px;}
+
+/* Reflowed dialogue: text and button never share an absolute-positioned rectangle. */
+.roma-dialogue__box {
+    width:min(900px,100%);min-height:0;aspect-ratio:auto;padding:18px 24px;display:grid;grid-template-columns:1fr auto;gap:12px;
+    background:#ece4c8;border:4px solid #4b716b;box-shadow:0 0 0 2px #d1c795,inset 0 0 0 2px #acb392;filter:none;
+}
+.roma-dialogue__speaker {position:static;grid-column:1/-1;font-size:13px;color:#31564e;letter-spacing:.12em;text-shadow:none;}
+.roma-dialogue__text {position:static;grid-column:1/-1;color:#23312f;font-size:16px;line-height:1.5;text-shadow:none;}
+.roma-dialogue__continue {position:static;grid-column:2;min-height:44px;font-size:13px;background:#315b4b;color:#fff4d4;}
+.roma-dialogue__continue:hover,.roma-dialogue__continue:focus-visible {background:#264b3c;color:#fff4d4;}
+
+@media (max-width:620px),(max-height:500px) {
+    .roma-game {padding:0;min-height:100dvh;}
+    .roma-shell {width:100vw;height:100dvh;min-height:0;border:0;box-shadow:none;}
+    .roma-hud {top:max(8px,env(safe-area-inset-top));left:max(8px,env(safe-area-inset-left));right:8px;gap:8px;}
+    .roma-hud__back {min-width:44px;padding:0 8px;font-size:11px;}
+    .roma-hud__objective {min-width:0;max-width:none;padding:6px 8px;}
+    .roma-hud__objective strong {font-size:12px;line-height:1.3;}
+    .roma-hud__objective span {font-size:9px;}
+    .roma-hud__reset {width:auto;min-width:44px;padding:4px 7px;font-size:11px;}
+    #romaReset {display:none;}
+    .roma-controls {right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));grid-template-columns:repeat(4,48px);gap:8px;}
+    .roma-controls__button {width:48px;height:48px;}
+    .roma-dialogue {padding:14px;}
+    .roma-dialogue__box {padding:14px 18px;gap:10px;max-height:calc(100dvh - 28px);overflow:auto;}
+    .roma-dialogue__text {font-size:14px;line-height:1.45;}
+    .roma-dialogue__speaker {font-size:12px;}
+    .roma-dialogue__continue {font-size:12px;}
+    .inventory {top:84px;right:8px;max-width:150px;}
+    .inventory__title {display:none;}.inventory__items {margin:0;}
+    .roma-route {bottom:18px;left:10px;max-width:calc(100% - 252px);font-size:11px;padding:5px;}
+    .roma-combat-status {top:88px;font-size:12px;width:max-content;}
+    .roma-toast {top:138px;padding:8px;font-size:12px;}
+    .roma-cinema-caption {bottom:25px;font-size:12px;}
+}
+@media (max-height:500px) {
+    .roma-dialogue__box {max-width:720px;gap:8px;padding:12px 18px;}
+    .roma-dialogue__text {font-size:13px;}
+    .roma-dialogue__speaker {font-size:12px;}
+    .inventory {display:none;}
+    .roma-hud__objective {max-width:460px;}
+    .roma-combat-status {top:75px;padding:6px 10px;}
+}
