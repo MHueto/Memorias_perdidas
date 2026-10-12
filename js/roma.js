@@ -4,25 +4,30 @@
     const PLAYER_VERTICAL_OFFSET = 4;
     const SPEED = 270;
     const MEMORY_X = 1338;
-    const MEMORY_Y = 274;
+    const MEMORY_Y = 560;
+    const ARENA_GATE_X = 1500;
+    let historyUI;
+    let decaySaveClock = 0;
     const RENATO_SPRITE_SHEET = 'assets/images/renato/renato-walk-spritesheet-v4.png';
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const areas = {
         city: { width: 2172, height: 724, floorY: 584, startX: 280, label: 'Entrada e mercado de Roma' },
-        forum: { width: 2079, height: 756, floorY: 650, startX: 150, label: 'Foro Romano e Cúria' },
+        forum: { width: 2079, height: 756, floorY: 620, startX: 150, label: 'Foro Romano e Cúria' },
         colosseum: { width: 2079, height: 756, floorY: 666, startX: 150, label: 'Exterior do Coliseu' },
         arena: { width: 2079, height: 756, floorY: 708, startX: 240, label: 'Corredor de observação da arena' },
-        artisans: { width:1536,height:768,floorY:604,startX:180,label:'Rua dos artesãos' },
+        artisans: { width:1536,height:768,floorY:578,startX:180,label:'Rua dos artesãos' },
         workshop: { width:1536,height:768,floorY:638,startX:180,label:'Oficina do artesão' },
         residential: { width:1536,height:768,floorY:578,startX:180,label:'Bairro residencial' },
-        courtyard: { width:1536,height:768,floorY:636,startX:180,label:'Pátio da fonte' }
+        courtyard: { width:1536,height:768,floorY:636,startX:180,label:'Pátio da fonte' },
+        senateHall: {width:1536,height:768,floorY:606,startX:180,label:'Interior do Senado'}
     };
 
     // Every doorway has an explicit destination and return position; no guessed room pairing.
     const portals = {
         city:[{x:500,to:'artisans',spawn:180,label:'RUA DOS ARTESÃOS'}],
-        forum:[{x:1040,to:'residential',spawn:180,label:'BAIRRO RESIDENCIAL'}],
+        forum:[{x:1040,to:'residential',spawn:180,label:'BAIRRO RESIDENCIAL'},{x:1590,to:'senateHall',spawn:190,label:'SENADO'}],
+        senateHall:[{x:170,to:'forum',spawn:1590,label:'VOLTAR AO FORO'}],
         artisans:[{x:960,to:'workshop',spawn:180,label:'OFICINA DO ARTESÃO'}],
         residential:[{x:1110,to:'courtyard',spawn:180,label:'PÁTIO DA FONTE'}],
         workshop:[{x:160,to:'artisans',spawn:960,label:'VOLTAR À RUA'}],
@@ -36,7 +41,8 @@
         artisans:{left:{to:'city',spawn:500,label:'MERCADO'},right:{to:'residential',spawn:180,label:'BAIRRO'}},
         workshop:{left:{to:'artisans',spawn:960,label:'RUA DOS ARTESÃOS'}},
         residential:{left:{to:'forum',spawn:1040,label:'FORO'},right:{to:'artisans',spawn:1400,label:'RUA DOS ARTESÃOS',turnBack:true}},
-        courtyard:{left:{to:'residential',spawn:1110,label:'BAIRRO'}}
+        courtyard:{left:{to:'residential',spawn:1110,label:'BAIRRO'}},
+        senateHall:{left:{to:'forum',spawn:1590,label:'FORO'}}
     };
 
     const sprites = {
@@ -47,7 +53,7 @@
     const briefing = [
         { speaker: 'PEDRO NEVES', text: 'Renato, você atravessou a primeira memória instável. Esta é Roma, pouco antes de uma ruptura capaz de mudar tudo.' },
         { speaker: 'PEDRO NEVES', text: 'O fragmento perdido está dentro do Coliseu. Há um espetáculo em curso, e entrar na arena sem observar o ambiente seria perigoso.' },
-        { speaker: 'PEDRO NEVES', text: 'Encontre um caminho seguro. Não tente resolver a memória à força: aqui, cada interferência deixa marcas.' },
+        { speaker: 'PEDRO NEVES', text: 'Encontre um caminho seguro. Você trouxe dois livros: use o botão Livros ou B para comparar as memórias com os registros históricos.' },
         { speaker: 'RENATO', text: 'Vou entender o que está acontecendo no Coliseu antes de agir.' }
     ];
     const arenaWarning = [
@@ -62,26 +68,16 @@
         { speaker: 'CORDEIRO', text: 'Esse laço é resistente o bastante para puxar cargas, mas não desperdice: ele sempre volta para quem souber lançar.' },
         { speaker: 'RENATO', text: 'É exatamente o que preciso para alcançar a memória sem entrar na areia.' }
     ];
-    const senateBriefing = [
-        { speaker: 'SENADOR LÚCIO', text: 'Você trouxe o fragmento? Ele expôs uma ordem que estava escondida entre os registros: retirar a guarda de pontos estratégicos.' },
-        { speaker: 'SENADOR LÚCIO', text: 'Leve este despacho ao posto militar. A cidade precisa de uma decisão antes que os rumores se espalhem.' },
-        { speaker: 'RENATO', text: 'Eu entrego. Mas essa ordem parece… instável.' }
-    ];
-    const militaryBriefing = [
-        { speaker: 'COMANDANTE', text: 'Despacho recebido. A patrulha deixa os acessos e se concentra no Foro. Ninguém passa sem autorização.' },
-        { speaker: 'RENATO', text: 'Espere, isso vai deixar outras ruas sem proteção!' },
-        { speaker: 'COMANDANTE', text: 'A decisão do Senado já chegou tarde demais.' }
-    ];
-    const merchantBriefing = [
-        { speaker: 'MERCADORA', text: 'Sem guardas nos acessos, todos ouviram que há saqueadores a caminho. As barracas estão fechando e as famílias estão fugindo.' },
-        { speaker: 'RENATO', text: 'A ordem que entreguei começou isso… preciso voltar ao Senado.' }
-    ];
-    const fallBriefing = [
-        { speaker: 'PEDRO NEVES', text: 'Renato, a memória reagiu às suas interferências. O despacho, a retirada da guarda e o pânico formaram uma cadeia que não existia antes.' },
-        { speaker: 'RENATO', text: 'Eu queria consertar uma lembrança e empurrei Roma para o colapso.' },
-        { speaker: 'PEDRO NEVES', text: 'Agora você entende o peso do Cofre. Recuperar um fragmento não basta: é preciso reconhecer o que foi alterado e o que você provocou.' }
-    ];
-
+    const storyObjectives = {
+        senate:'Entre no Senado, no Foro, e examine a folha com Lúcio.',
+        emperorAudience:'Converse com a projeção de Teodósio e confira o decreto de 382.',
+        treatyDispatch:'Leve o decreto ao mensageiro no lado esquerdo do Foro.',
+        warnMarket:'Procure a mercadora no mercado para entender o cerco.',
+        siegeCouncil:'Volte ao interior do Senado e confira o destino da carta.',
+        witness410:'Vá ao portão do mercado para acompanhar a memória de 410.',
+        aftermath:'Examine a última página junto ao portão do mercado.'
+    };
+    const historySteps = Object.keys(storyObjectives);
     const viewport = document.querySelector('#romaViewport');
     const shell = document.querySelector('.roma-shell');
     const world = document.querySelector('#romaWorld');
@@ -136,6 +132,26 @@
     if (state.step === 'lassoAim' && !state.items.rope) state.step = 'distract';
     state.lionsDistracted = state.step === 'lassoAim';
 
+    // Migration is additive: keep collected items and discovered routes.
+    const historicalIds=['adrianople','alliance','division','siege','aftermath'];
+    const chapterIds=['crisis378','treaty382','division395','siege410','legacy476'];
+    const oldHistory=state.history && typeof state.history==='object'?state.history:{};
+    state.history={
+        version:7,
+        noted:Array.isArray(oldHistory.noted)?oldHistory.noted.filter(id=>chapterIds.includes(id)):[],
+        answers:Array.isArray(oldHistory.answers)?oldHistory.answers.filter(id=>historicalIds.includes(id)):[],
+        activeMs:Math.max(0,Math.min(Number(oldHistory.activeMs)||0,900000)),
+        stage:Math.max(1,Math.min(Number(oldHistory.stage)||1,5)),
+        epoch:oldHistory.epoch||'378',
+        attempts:Number(oldHistory.attempts)||0
+    };
+    if(oldHistory.version!==7 && (state.items.memory || state.finished || ['senate','deliverOrder','warnMarket','finalSenate'].includes(state.step))){
+        state.items.memory=true;state.items.dispatch=false;state.finished=false;
+        state.step='senate';state.cityState=2;state.history.stage=2;
+        state.history.answers=[];state.history.epoch='378';
+    }
+    if(state.finished && state.history.answers.length<5){state.finished=false;state.step='senate';}
+    state.cityState=Math.max(state.history.stage,Math.min(4,1+Math.floor(state.history.activeMs/150000)));
     const player = { x: state.x, facing: 'right', moving: false, walkTime: 0 };
     const heldKeys = new Set();
     let displayedSprite = '';
@@ -171,14 +187,14 @@
     let lastPrompt = '';
     let impactShake=0;
     let lionHitPause=0;
-    const arenaFloor = 602;
+    const arenaFloor = 570;
     const mapPanel = document.querySelector('#romaMapPanel');
     const mapButton = document.querySelector('#romaMap');
     const combatStatus = document.querySelector('#romaCombatStatus');
     const routeStatus = document.querySelector('#romaRoute');
     const transition = document.querySelector('#romaTransition');
     const cinemaCaption = document.querySelector('#romaCinemaCaption');
-    const backgrounds = { city:'entrada-roma-pixelart-v1.png', forum:'foro-senado-pixelart-v1.png', colosseum:'coliseu-exterior-pixelart-v1.png', arena:'arena-coliseu-pixelart-v1.png',artisans:'rua-dos-artesaos-v4.png',workshop:'oficina-artesao-v5.png',residential:'bairro-residencial-v4.png',courtyard:'patio-romano-v4.png' };
+    const backgrounds = { city:'entrada-roma-simples-v6.png', forum:'foro-senado-simples-v6.png', colosseum:'coliseu-exterior-simples-v6.png', arena:'arena-coliseu-simples-v6.png',artisans:'rua-dos-artesaos-simples-v6.png',workshop:'oficina-artesao-simples-v6.png',residential:'bairro-residencial-v4.png',courtyard:'patio-romano-simples-v6.png',senateHall:'senado-interior-simples-v6.png' };
     const imageLoads = new Map();
     function preloadScene(key) {
         if (!imageLoads.has(key)) {
@@ -251,7 +267,7 @@
         const callback = dialogueOnClose;
         dialogueOnClose = null;
         callback?.();
-        viewport.focus({ preventScroll: true });
+        if(!historyUI?.isOpen())viewport.focus({ preventScroll: true });
     }
 
     function openCraft() {
@@ -319,9 +335,11 @@
         npcActors.push({ node, sprite, x, row,
             min: Math.max(80,x-distance), max: Math.min(area().width-80,x+distance),
             direction: options.distance < 0 ? -1 : 1, walking: !!options.walk,
-            clock: npcActors.length*143, pause: 0, speed: state.cityState>=4 ? 125 : type==='elder'?35:type==='messenger'?76:46+npcActors.length%4*6,
+            clock: npcActors.length*143, pause: 0, speed: options.speed || (state.cityState>=4 ? 125 : type==='elder'?35:type==='messenger'?76:46+npcActors.length%4*6),
             floor:area().floorY - (options.lift || 0) - 1 });
         npcsLayer.append(node);
+        if(options.emperor)node.classList.add('is-emperor');
+        if(options.invader)node.classList.add('is-invader');
     }
 
     function addLion(x, faceLeft = false) {
@@ -338,7 +356,8 @@
     }
 
     function addDoll(x) {
-        const node = addProp('doll', x-17, arenaFloor-52, 'is-thrown-doll');
+        const node = addProp('doll', x-27, arenaFloor-78, 'is-thrown-doll');
+        node.dataset.hits='0';
         actorsLayer.append(node);
         dolls.push({node,x,from:player.x,hits:0});
         return node;
@@ -384,8 +403,8 @@
             const t=1-throwTime/900;
             dolls.forEach(doll=>{
                 const x=doll.from+(doll.x-doll.from)*t;
-                const y=area().floorY-55+(arenaFloor-area().floorY)*t-Math.sin(t*Math.PI)*190;
-                doll.node.style.left=`${x-17}px`; doll.node.style.top=`${y}px`;
+                const y=area().floorY-78+(arenaFloor-area().floorY)*t-Math.sin(t*Math.PI)*190;
+                doll.node.style.left=`${x-27}px`; doll.node.style.top=`${y}px`;
                 doll.node.style.transform=`rotate(${t*360}deg)`;
             });
             if(throwTime===0) {
@@ -449,7 +468,8 @@
                         effects.push({node:slash,x:lion.x+lion.direction*48,y:arenaFloor-53,vx:0,vy:0,life:180,max:180});
                     }
                     if(doll) {
-                        doll.hits++;
+                        doll.hits++;doll.node.dataset.hits=String(doll.hits);
+                        doll.node.classList.toggle('is-frayed',doll.hits>=3);
                         doll.node.animate([{transform:'rotate(0deg)'},{transform:`rotate(${lion.direction*26}deg)`},{transform:'rotate(0deg)'}],{duration:330});
                     } else if(rival && !state.lionsDistracted) {
                         rival.direction=Math.sign(lion.x-rival.x)||-1;
@@ -483,8 +503,8 @@
         }
         combatStatus.hidden=state.step!=='lassoAim';
         if(!combatStatus.hidden) {
-            combatStatus.textContent=`DISTRAÇÃO ${Math.ceil(distractionTime/1000)}s · ${Math.abs(aimX-MEMORY_X)<45?'AGORA: AÇÃO / ESPAÇO':'Espere a mira alcançar o fragmento'}`;
-            combatStatus.classList.toggle('is-ready',Math.abs(aimX-MEMORY_X)<45);
+            combatStatus.textContent=`DISTRAÇÃO ${Math.ceil(distractionTime/1000)}s · ${Math.abs(aimX-MEMORY_X)<52?'AGORA: AÇÃO / ESPAÇO':'Espere a mira alcançar a folha'}`;
+            combatStatus.classList.toggle('is-ready',Math.abs(aimX-MEMORY_X)<52);
         }
     }
 
@@ -524,13 +544,16 @@
             residential:[[240,'messenger'],[490,'neighbor'],[710,'merchant'],[940,'elder'],[1300,'citizen']],
             courtyard:[[420,'elder'],[860,'neighbor'],[1190,'messenger']]
         };
-        (crowds[state.area]||[]).forEach(([x,type],i)=>addNpc(x,type,{walk:true,distance:i%2?-65:85}));
+        (crowds[state.area]||[]).filter((_,i)=>state.cityState<4||i%2===0).forEach(([x,type],i)=>addNpc(x,type,{walk:true,distance:i%2?-65:85}));
         if(state.area==='city')addNpc(1050,'neighbor',{talk:true});
         if(state.area==='forum') {
             addNpc(1540,'senator',{talk:true});
             if(state.cityState>=3)[345,1660].forEach(x=>addNpc(x,'soldier',{walk:true,distance:45}));
         }
-        if(state.area==='colosseum')addNpc(1500,'soldier',{talk:true});
+        if(state.area==='colosseum')addNpc(1660,'soldier',{talk:true});
+        if(state.area==='senateHall') {addNpc(780,'senator',{talk:true});if(state.step==='emperorAudience')addNpc(1200,'senator',{emperor:true});}
+        if(state.area==='forum')addNpc(310,'messenger',{talk:true});
+        if(state.area==='city'&&['aftermath','complete'].includes(state.step)) [340,425,510,600].forEach((x,i)=>addNpc(x,'soldier',{walk:true,distance:380,speed:64+i*5,invader:true}));
         if(state.area==='artisans')addNpc(340,'smith',{talk:true});
         if(state.area==='workshop')addNpc(1070,'smith',{talk:true});
     }
@@ -558,20 +581,22 @@
             if (state.cityState >= 4) addProp('barricade', 1510, area().floorY - 35);
         }
         if (state.area === 'forum') {
-            if (!has('rope')) addProp('rope', 610, area().floorY - 54);
+            if (!has('rope')) addProp('rope', 593, area().floorY - 40);
             if (state.cityState >= 3) addProp('barricade', 720, area().floorY - 35);
             if (state.cityState >= 4) addProp('barricade', 1190, area().floorY - 35);
         }
         if (state.area === 'colosseum') {
-            if (!has('straw')) addProp('straw', 285, area().floorY - 46);
-            addProp('gate', 1540, area().floorY - 110);
+            if (!has('straw')) addProp('straw-glint', 310, 600);
+            const gate=addProp('arena-entry', ARENA_GATE_X-75, area().floorY-74);
+            const label=document.createElement('span');label.textContent='COLISEU · ↑ ENTRAR';gate.append(label);
         }
         if(state.area==='workshop')addProp('forge-glow',520,510);
         if(state.area==='courtyard'&&!state.discoveries.fountain)addProp('echo',690,area().floorY-90);
         if (state.area === 'arena') {
             if (!has('memory')) {
-                memoryNode=addProp('memory',MEMORY_X-21,MEMORY_Y-28);
+                memoryNode=addProp('memory',MEMORY_X-20,MEMORY_Y-10);
                 memoryNode.dataset.targetX=String(MEMORY_X);
+                memoryNode.dataset.targetY=String(MEMORY_Y);
             }
             addLion(1060, false);
             addLion(1450, true);
@@ -584,6 +609,7 @@
                 createAim();
             }
         }
+        renderDecay();
         combatStatus.hidden=true;
         renderRoute();
         updateNpcs(0); updateLions(0);
@@ -634,13 +660,14 @@
 
     function destination() {
         if(state.finished)return null;
-        return ({travelColosseum:['colosseum',1580],observeArena:['arena',1410],needStraw:['colosseum',330],craftDolls:['workshop',980],findRope:['forum',640],distract:['arena',1200],lassoAim:['arena',1200],senate:['forum',1590],deliverOrder:['forum',310],warnMarket:['city',1050],finalSenate:['forum',1590]})[state.step];
+        if(historySteps.includes(state.step))return ({senate:['senateHall',780],emperorAudience:['senateHall',1200],treatyDispatch:['forum',310],warnMarket:['city',1050],siegeCouncil:['senateHall',780],witness410:['city',600],aftermath:['city',760]})[state.step];
+        return ({travelColosseum:['colosseum',1500],observeArena:['arena',1410],needStraw:['colosseum',330],craftDolls:['workshop',980],findRope:['forum',640],distract:['arena',1200],lassoAim:['arena',1200],senate:['forum',1590],deliverOrder:['forum',310],warnMarket:['city',1050],finalSenate:['forum',1590]})[state.step];
     }
 
     function navigationEdges(key) {
         const links=[...(portals[key]||[])];
         Object.entries(exits[key]||{}).forEach(([side,exit])=>links.push({...exit,x:side==='left'?60:areas[key].width-60}));
-        if(key==='colosseum')links.push({to:'arena',x:1580});
+        if(key==='colosseum')links.push({to:'arena',x:1500});
         return links;
     }
 
@@ -689,7 +716,7 @@
     }
 
     function openMap() {
-        if(dialogueOpen||craftOpen||cutscene||sceneLoading||portalEntering||!endingPanel.hidden||lassoResolving)return;
+        if(dialogueOpen||craftOpen||historyUI?.isOpen()||cutscene||sceneLoading||portalEntering||!endingPanel.hidden||lassoResolving)return;
         mapOpen=true;heldKeys.clear();mapPanel.hidden=false;shell.classList.add('has-modal');
         const list=mapPanel.querySelector('.roma-map__locations');list.replaceChildren();
         const target=destination();
@@ -703,7 +730,7 @@
             if(target?.[0]===key)button.textContent+=' · objetivo';
             button.addEventListener('click',()=>{
                 closeMap();
-                const spawn=routeTarget(key)?.[1]??({city:500,forum:1040,colosseum:1500,arena:1180,artisans:960,workshop:980,residential:1110,courtyard:680})[key];
+                const spawn=routeTarget(key)?.[1]??({city:500,forum:1040,colosseum:1500,arena:1180,artisans:960,workshop:980,residential:1110,courtyard:680,senateHall:780})[key];
                 setArea(key,spawn);
             });
             list.append(button);
@@ -724,15 +751,21 @@
         const entry=(portals[state.area]||[]).find(portal=>within(portal.x,85));
         if(entry)return {x:entry.x,text:entry.label+'\n↑ / E ENTRAR',action:'portal',portal:entry};
         if (state.area === 'colosseum') {
-            if (state.step === 'needStraw' && within(330, 110)) return { x: 330, text: 'PALHA\n↑ COLETAR', action: 'straw' };
-            if (within(1580, 125)) return { x: 1580, text: 'PORTÃO DA ARENA\n↑ ENTRAR', action: 'arena' };
+            if (state.step === 'needStraw' && within(330, 110)) return { x: 330, text: 'PALHA CAÍDA DA CARROÇA\n↑ / E RECOLHER', action: 'straw' };
+            if (within(ARENA_GATE_X, 100)) return { x: ARENA_GATE_X, text: 'PORTÃO DO COLISEU\n↑ / E ENTRAR', action: 'arena' };
         }
         if (state.area === 'arena') {
-            if (state.step === 'observeArena' && within(1410, 130)) return { x: 1410, y: 300, text: 'MEMÓRIA INSTÁVEL\n↑ OBSERVAR', action: 'observe' };
+            if (state.step === 'observeArena' && within(1410, 130)) return { x: 1410, y: 400, text: 'FOLHA NA AREIA\n↑ OBSERVAR', action: 'observe' };
             if (state.step === 'distract' && within(1100, 470)) return { x: player.x, text: 'BONECOS DE PALHA\n↑ LANÇAR', action: 'dolls' };
             if (state.step === 'lassoAim') return { x: player.x, text: 'MIRE NO FRAGMENTO\nAÇÃO / ESPAÇO', action: 'lasso' };
         }
+        if(state.area==='senateHall'){
+            if(within(780,105))return {x:780,text:'LÚCIO · ARQUIVOS\n↑ / E CONVERSAR',action:state.step==='senate'?'senate':state.step==='siegeCouncil'?'siegeCouncil':'senateInfo'};
+            if(state.step==='emperorAudience'&&within(1200,100))return {x:1200,text:'TEODÓSIO · PROJEÇÃO DE 382\n↑ / E CONVERSAR',action:'emperor'};
+        }
         if (state.area === 'city') {
+            if(state.step==='witness410'&&within(600,100))return {x:600,text:'PORTÃO · MEMÓRIA DE 410\n↑ / E OBSERVAR',action:'witness'};
+            if(state.step==='aftermath'&&within(760,115))return {x:760,text:'ÚLTIMO REGISTRO\n↑ / E CONFERIR',action:'aftermath'};
             if (state.step === 'warnMarket' && within(1050, 120)) return { x: 1050, text: 'MERCADORA PREOCUPADA\n↑ CONVERSAR', action: 'merchant' };
         }
         if(state.area==='workshop'&&within(980,120))return {x:980,text:'BANCADA DO ARTESÃO\n↑ '+(state.step==='craftDolls'?'FABRICAR':'EXAMINAR'),action:state.step==='craftDolls'?'craft':'workshopInfo'};
@@ -741,17 +774,16 @@
         if(state.area==='courtyard'&&within(700,110))return {x:700,text:'FONTE DO PÁTIO\n↑ EXAMINAR',action:'fountain'};
         if (state.area === 'forum') {
             if (state.step === 'findRope' && within(640, 118)) return { x: 640, text: 'LAÇO DO CORDEIRO\n↑ PEGAR', action: 'rope' };
-            if (state.step === 'senate' && within(1590, 132)) return { x: 1590, text: 'CÚRIA DO SENADO\n↑ ENTRAR', action: 'senate' };
-            if (state.step === 'deliverOrder' && within(310, 120)) return { x: 310, text: 'POSTO MILITAR\n↑ ENTREGAR', action: 'military' };
-            if (!state.finished && state.step === 'finalSenate' && within(1590, 132)) return { x: 1590, text: 'SENADO EM CRISE\n↑ ENTRAR', action: 'final' };
+            if(state.step==='treatyDispatch'&&within(310,110))return {x:310,text:'MENSAGEIRO\n↑ / E CONFERIR O MAPA',action:'messenger'};
         }
         return null;
     }
 
     function updatePrompt() {
+        propsLayer.querySelector('.roma-prop--arena-entry')?.classList.toggle('is-near',Math.abs(player.x-ARENA_GATE_X)<=100);
         propsLayer.querySelectorAll('.roma-prop--entrance').forEach(door=>door.classList.toggle('is-near',Math.abs(player.x-Number(door.dataset.x))<=85));
         const interaction = currentInteraction();
-        if (!interaction || dialogueOpen || craftOpen || mapOpen || cutscene || !endingPanel.hidden || state.step==='lassoAim') { prompt.classList.remove('is-visible'); return; }
+        if (!interaction || dialogueOpen || craftOpen || mapOpen || historyUI?.isOpen() || cutscene || !endingPanel.hidden || state.step==='lassoAim') { prompt.classList.remove('is-visible'); return; }
         const y = interaction.y ?? area().floorY - 205;
         prompt.style.left = `${interaction.x - 85}px`;
         prompt.style.top = `${y}px`;
@@ -760,8 +792,10 @@
     }
 
     async function startArenaVisit() {
+        if(portalEntering)return;
         const firstVisit=state.step==='travelColosseum';
-        if(!await setArea('arena', 250))return;
+        await enterPortal({to:'arena',spawn:250});
+        if(state.area!=='arena')return;
         if (state.step === 'travelColosseum') {
             state.step = 'observeArena';
             setObjective('Aproxime-se da memória, mas mantenha distância dos leões.');
@@ -776,7 +810,7 @@
         state.lionsDistracted = true;
         state.step = 'lassoAim';
         world.dataset.step=state.step;
-        setObjective('Mire no fragmento azul e pressione ESPAÇO ou AÇÃO para lançar o laço.');
+        setObjective('Mire na folha sobre a areia e pressione ESPAÇO ou AÇÃO para lançar o laço.');
         saveGame();
         addDoll(900);addDoll(1130);
         throwTime=900;distractionTime=24900;
@@ -787,7 +821,7 @@
     function throwLasso() {
         if (state.area!=='arena' || state.step !== 'lassoAim' || lassoResolving || !reticle || throwTime>0) return;
         lassoResolving = true;
-        const success = Math.abs(aimX - MEMORY_X) < 45;
+        const success = Math.abs(aimX - MEMORY_X) < 52;
         lasso.style.left = `${player.x + 32}px`;
         lasso.style.top = `${area().floorY - 40}px`;
         const dx = aimX - (player.x+32);
@@ -806,20 +840,20 @@
         memoryNode?.animate([{ transform: 'translate(0,0) scale(1)' }, { transform: `translate(${player.x-MEMORY_X}px, ${area().floorY-MEMORY_Y-40}px) scale(.45)` }], { duration: prefersReducedMotion ? 1 : 1100, easing: 'ease-in', fill: 'forwards' });
         window.setTimeout(async () => {
             state.items.memory = true;
-            state.cityState = 2;
+            state.history.stage=2;state.cityState = Math.max(2,state.cityState);
             state.step = 'senate';
             state.lionsDistracted = false;
-            setObjective('Leve a memória restaurada ao Senado, no Foro Romano.');
+            setObjective('Entre no Senado e compare a folha com os livros de Renato.');
             setCheckpoint('Memória do Coliseu recuperada');
             showToast('ITEM ADQUIRIDO — MEMÓRIA DE ROMA');
             await setArea('colosseum', 1510);
-            openDialogue([{ speaker: 'PEDRO NEVES', text: 'Você recuperou o fragmento, mas ele revelou um despacho escondido. Leve-o ao Senado: precisamos entender por que foi alterado.' }]);
+            openDialogue([{ speaker: 'PEDRO NEVES', text: 'A folha recuperada tem datas trocadas. Leve-a a Lúcio, dentro do Senado, e use seus livros para conferir o que foi alterado.' }]);
             lassoResolving = false;
         }, prefersReducedMotion ? 40 : 1120);
     }
 
     function handleInteraction() {
-        if (dialogueOpen || craftOpen || mapOpen || cutscene || sceneLoading || portalEntering || lassoResolving || !endingPanel.hidden) return;
+        if (dialogueOpen || craftOpen || mapOpen || historyUI?.isOpen() || cutscene || sceneLoading || portalEntering || lassoResolving || !endingPanel.hidden) return;
         const interaction = currentInteraction();
         if (!interaction) return;
         if(interaction.action==='portal') {enterPortal(interaction.portal);return;}
@@ -850,27 +884,92 @@
         });
         if (interaction.action === 'dolls') throwDolls();
         if (interaction.action === 'lasso') showToast('Use ESPAÇO ou o botão AÇÃO para lançar o laço.');
-        if (interaction.action === 'senate') openDialogue(senateBriefing, () => {
-            state.items.dispatch = true;
-            setStep('deliverOrder', 'Entregue o despacho no posto militar à esquerda do Foro.', 'Despacho recebido');
-            showToast('ITEM ADQUIRIDO — DESPACHO DO SENADO');
+        if(interaction.action==='senateInfo')openDialogue([{speaker:'LÚCIO',text:has('memory')?'Os livros distinguem as lembranças das passagens adulteradas. Uma página anotada pode fundamentar uma correção.':'Recupere a folha que está na arena. Depois, compare seus registros com os livros que trouxe.'}]);
+        if(interaction.action==='senate')openDialogue([
+            {speaker:'LÚCIO',text:'Esta folha põe o saque de Roma em 378. Algo foi trocado. Antes de devolver o registro, encontre uma evidência nos seus livros.'},
+            {speaker:'RENATO',text:'Vou conferir a data e o acontecimento. Não basta adivinhar a resposta.'}
+        ],()=>askHistory('adrianople',()=>{
+            advanceHistory('emperorAudience','382',2);
+            beginCutscene('timeline',3300,'382 d.C. · O Cofre projeta Teodósio no salão. Esta audiência é uma encenação, não um encontro histórico em Roma.');
+        }));
+        if(interaction.action==='emperor')openDialogue([
+            {speaker:'TEODÓSIO · PROJEÇÃO',text:'Meu decreto aparece como uma expulsão de todos os godos. O registro foi adulterado. Como era o acordo?'},
+            {speaker:'RENATO',text:'Preciso consultar o capítulo de 382 e devolver ao texto a proposta correta.'}
+        ],()=>askHistory('alliance',()=>{
+            state.items.dispatch=true;advanceHistory('treatyDispatch','395',2);
+            beginCutscene('timeline',2700,'395 d.C. · A memória avança treze anos. Leve o registro ao mensageiro no Foro.');
+        }));
+        if(interaction.action==='messenger')openDialogue([
+            {speaker:'MENSAGEIRO',text:'O decreto foi recebido. Mas neste mapa, as cortes do Oriente e do Ocidente estão com os nomes trocados.'}
+        ],()=>askHistory('division',()=>{
+            advanceHistory('warnMarket','408–410',3);
+            beginCutscene('timeline',3300,'408–410 d.C. · Outro salto temporal. Cercos e negociações frustradas afetam o abastecimento de Roma.');
+        }));
+        if(interaction.action==='merchant')openDialogue([
+            {speaker:'MERCADORA',text:'Os suprimentos não chegam como antes. Disseram que a corte está aqui no Coliseu, mas isso não faz sentido. Leve esta dúvida a Lúcio.'},
+            {speaker:'RENATO',text:'Vou comparar a carta com os registros do cerco. Não quero mandar a mensagem para o lugar errado.'}
+        ],()=>advanceHistory('siegeCouncil','408–410',3));
+        if(interaction.action==='siegeCouncil')openDialogue([
+            {speaker:'LÚCIO',text:'A carta ao imperador ficou presa em uma rota errada. Consulte seus livros: onde estava a corte de Honório durante essa crise?'}
+        ],()=>askHistory('siege',()=>{
+            advanceHistory('witness410','410',4);
+            showToast('Destino da carta corrigido. Vá ao portão do mercado.');
+        }));
+        if(interaction.action==='witness') {
+            advanceHistory('aftermath','410',5);
+            beginCutscene('invasion',6200,'410 d.C. · Seguidores de Alarico entram em Roma. A memória mostra o saque; não o desaparecimento completo da cidade.');
+        }
+        if(interaction.action==='aftermath')openDialogue([
+            {speaker:'PEDRO NEVES',text:'A última página misturou o saque de 410 com uma deposição que veio depois. Confira as duas datas para terminar a restauração.'}
+        ],()=>askHistory('aftermath',finishHistory));
+    }
+
+    function askHistory(id,callback){
+        historyUI.ask(id,()=>{
+            if(!state.history.answers.includes(id))state.history.answers.push(id);
+            saveGame();shell.classList.remove('is-restoring');void shell.offsetWidth;shell.classList.add('is-restoring');
+            callback();
         });
-        if (interaction.action === 'military') openDialogue(militaryBriefing, () => {
-            state.cityState = 3;
-            setStep('warnMarket', 'Volte ao mercado e fale com a comerciante preocupada.', 'Patrulhas deslocadas');
+    }
+    function advanceHistory(step,epoch,stage){
+        state.history.epoch=epoch;state.history.stage=stage;
+        state.cityState=Math.max(stage,Math.min(4,1+Math.floor(state.history.activeMs/150000)));
+        setStep(step,storyObjectives[step],'Registro de '+epoch);updateHistoryStatus();
+    }
+    function finishHistory(){
+        state.step='complete';state.finished=true;state.history.stage=5;state.cityState=5;state.history.epoch='410 / 476';
+        saveGame();setObjective('Cinco registros restaurados. Consulte os livros ou continue explorando.');
+        renderScene();endingPanel.hidden=false;endingPanel.querySelector('a').focus();
+    }
+    function updateHistoryStatus(){
+        world.dataset.epoch=state.history.epoch;world.dataset.erosion=String(state.cityState);
+        world.dataset.activeMs=String(Math.floor(state.history.activeMs));
+        const status=document.querySelector('#romaMemoryStatus');
+        status.textContent=state.history.epoch+' d.C. · '+state.history.answers.length+'/5 registros · '+['','íntegra','fissuras','desgaste','ruínas','saque de 410'][state.cityState];
+    }
+    function renderDecay(){
+        const layer=document.querySelector('#romaDecay');layer.replaceChildren();
+        world.dataset.cityState=String(state.cityState);updateHistoryStatus();
+        const level=state.cityState;if(level<2)return;
+        const positions={city:[160,700,1360,1850],forum:[190,840,1390,1860],colosseum:[95,875,1240,1910],arena:[210,650,1800],artisans:[260,610,1270],workshop:[410,1150],residential:[280,740,1390],courtyard:[370,1040,1320],senateHall:[340,930,1380]};
+        const prop=(kind,x,y)=>{const n=document.createElement('i');n.className='roma-decay roma-decay--'+kind;n.style.left=x+'px';n.style.top=y+'px';layer.append(n);};
+        (positions[state.area]||[]).forEach((x,i)=>{
+            prop('crack',x,area().floorY-215-(i%2)*105);
+            if(level>=3)prop('rubble',x-25,area().floorY-20);
+            if(level>=4&&(i===1||level===5)&&state.area!=='arena'){
+                prop('smoke',x-24,area().floorY-244);
+                prop('fire',x+10,area().floorY-72);
+            }
+            if(level>=5)prop('rubble',x+110,area().floorY-23);
         });
-        if (interaction.action === 'merchant') openDialogue(merchantBriefing, () => {
-            state.cityState = 4;
-            setStep('finalSenate', 'Retorne ao Senado. A cidade está entrando em colapso.', 'Pânico no mercado');
-        });
-        if (interaction.action === 'final') openDialogue(fallBriefing, () => {
-            state.cityState = 5;
-            state.finished = true;
-            setObjective('Memória de Roma concluída.');
-            setCheckpoint('Queda de Roma');
-            renderScene();
-            window.setTimeout(() => { endingPanel.hidden = false; }, prefersReducedMotion ? 0 : 450);
-        });
+        if(level>=3&&['city','artisans','residential'].includes(state.area))prop('boards',state.area==='city'?850:410,area().floorY-190);
+    }
+    function updateDecay(delta){
+        if(state.finished)return;
+        state.history.activeMs+=delta;decaySaveClock+=delta;
+        const level=Math.max(state.history.stage,Math.min(4,1+Math.floor(state.history.activeMs/150000)));
+        if(level!==state.cityState){state.cityState=level;renderDecay();npcActors.forEach(n=>{if(n.walking)n.speed=Math.min(125,n.speed+18);});}
+        if(decaySaveClock>=5000){decaySaveClock=0;saveGame();updateHistoryStatus();}
     }
 
     function updateSprite() {
@@ -897,6 +996,7 @@
         let focus=player.x+(player.moving?(player.facing==='right'?75:-75):0);
         if(combat)focus=(combatLeft+combatRight)/2;
         if(cutscene?.kind==='arena')focus=1100;
+        if(cutscene?.kind==='invasion')focus=590;
         const x=scaledWidth<=cameraWidth?(cameraWidth-scaledWidth)/2:clamp(cameraWidth/2-focus*scale,cameraWidth-scaledWidth,0);
         if(cameraX===null||prefersReducedMotion)cameraX=x;
         else cameraX+=(x-cameraX)*(1-Math.exp(-delta/105));
@@ -910,15 +1010,15 @@
     function updateAim(delta) {
         if (state.area !== 'arena' || state.step !== 'lassoAim' || !reticle) return;
         aimClock += delta;
-        aimX = MEMORY_X + Math.sin(aimClock / 600) * 115;
+        aimX = MEMORY_X + (prefersReducedMotion ? 0 : Math.sin(aimClock / 850) * 115);
         reticle.style.left = `${aimX}px`;
         reticle.style.top = `${MEMORY_Y}px`;
-        reticle.classList.toggle('is-on-target',Math.abs(aimX-MEMORY_X)<45);
+        reticle.classList.toggle('is-on-target',Math.abs(aimX-MEMORY_X)<52);
     }
 
     function update(delta) {
         world.dataset.step=state.step;
-        const paused=dialogueOpen||craftOpen||mapOpen||sceneLoading||portalEntering||!endingPanel.hidden||document.hidden;
+        const paused=dialogueOpen||craftOpen||mapOpen||historyUI?.isOpen()||sceneLoading||portalEntering||!endingPanel.hidden||document.hidden;
         if (!paused && !lassoResolving && !cutscene) {
             let direction = 0;
             if (heldKeys.has('arrowleft') || heldKeys.has('a')) direction -= 1;
@@ -938,6 +1038,7 @@
             if(exit){if(exit.turnBack)player.facing='left';setArea(exit.to,exit.spawn,!exit.turnBack);return;}
         } else player.moving = false;
         if(!paused) {
+            if(!cutscene&&!lassoResolving)updateDecay(delta);
             updateNpcs(delta);updateLions(delta);updateEffects(delta);
             if(!cutscene&&!lassoResolving)updateAim(delta);
             if(cutscene){cutscene.clock+=delta;if(cutscene.clock>=cutscene.duration)endCutscene();}
@@ -955,11 +1056,12 @@
     }
 
     function useAction() {
-        if (dialogueOpen || craftOpen || mapOpen || cutscene || sceneLoading || portalEntering || !endingPanel.hidden) return;
+        if (dialogueOpen || craftOpen || mapOpen || historyUI?.isOpen() || cutscene || sceneLoading || portalEntering || !endingPanel.hidden) return;
         if (state.step === 'lassoAim') throwLasso();
     }
 
     function setKey(event, pressed) {
+        if(event.defaultPrevented||historyUI?.isOpen())return;
         const key = event.key.toLowerCase();
         if(key==='tab' && pressed && (dialogueOpen||craftOpen||mapOpen)) {
             const modal=dialogueOpen?dialogue:craftOpen?craftPanel:mapPanel;
@@ -1006,7 +1108,7 @@
             button.addEventListener('pointerdown', (event) => {
                 event.preventDefault();
                 button.setPointerCapture?.(event.pointerId);
-                if (dialogueOpen || craftOpen || mapOpen || cutscene || sceneLoading || portalEntering || !endingPanel.hidden) return;
+                if (dialogueOpen || craftOpen || mapOpen || historyUI?.isOpen() || cutscene || sceneLoading || portalEntering || !endingPanel.hidden) return;
                 if (direction === 'interact') handleInteraction();
                 else if (direction === 'action') useAction();
                 else heldKeys.add(`arrow${direction}`);
@@ -1035,13 +1137,13 @@
                 craftDolls: 'Entre na rua dos artesãos, no mercado, e use a bancada dentro da oficina.',
                 findRope: 'Encontre um laço resistente no Foro Romano.',
                 distract: 'Retorne à arena e use os bonecos de palha para distrair os leões.',
-                lassoAim: 'Mire no fragmento azul e pressione ESPAÇO ou AÇÃO para lançar o laço.',
+                lassoAim: 'Mire na folha sobre a areia e pressione ESPAÇO ou AÇÃO para lançar o laço.',
                 senate: 'Leve a memória restaurada ao Senado, no Foro Romano.',
                 deliverOrder: 'Entregue o despacho no posto militar à esquerda do Foro.',
                 warnMarket: 'Volte ao mercado e fale com a comerciante preocupada.',
                 finalSenate: 'Retorne ao Senado. A cidade está entrando em colapso.'
             };
-            setObjective(labels[state.step] || 'Explore a memória de Roma.');
+            setObjective(storyObjectives[state.step] || labels[state.step] || 'Explore a memória de Roma.');
         }
         renderScene();
         updateSprite();
@@ -1049,6 +1151,13 @@
         requestAnimationFrame(animate);
     }
 
+    historyUI=window.RomaHistory.create({
+        getState:()=>({noted:state.history.noted,answers:state.history.answers,canOpen:!dialogueOpen&&!craftOpen&&!mapOpen&&!cutscene&&!sceneLoading&&!portalEntering&&!lassoResolving&&endingPanel.hidden}),
+        onPause:()=>{heldKeys.clear();player.moving=false;},
+        onResume:()=>{heldKeys.clear();previousTime=performance.now();},
+        onNote:id=>{if(!state.history.noted.includes(id))state.history.noted.push(id);saveGame();},
+        onMistake:()=>{state.history.attempts++;saveGame();}
+    });
     bindControls();
     start();
 })();

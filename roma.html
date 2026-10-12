@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#111322">
     <title>Memórias Perdidas — Queda de Roma</title>
-    <link rel="preload" as="image" href="assets/images/roma/entrada-roma-pixelart-v1.png">
-    <link rel="preload" as="image" href="assets/images/roma/foro-senado-pixelart-v1.png">
-    <link rel="preload" as="image" href="assets/images/roma/coliseu-exterior-pixelart-v1.png">
-    <link rel="preload" as="image" href="assets/images/roma/arena-coliseu-pixelart-v1.png">
-    <link rel="stylesheet" href="css/roma.css?v=roma-explore-4">
+    <link rel="preload" as="image" href="assets/images/roma/entrada-roma-simples-v6.png">
+    <link rel="stylesheet" href="css/roma.css?v=roma-mechanics-7">
+    <link rel="stylesheet" href="css/roma-mechanics.css?v=7">
 </head>
 <body class="roma-page">
     <main class="roma-game" aria-label="Memórias Perdidas: Queda de Roma">
@@ -18,6 +16,7 @@
                 <div id="romaWorld" class="roma-world" data-area="city" data-city-state="1" aria-hidden="true">
                     <div id="romaBackground" class="roma-world__background"></div>
                     <div id="romaAtmosphere" class="roma-world__atmosphere"></div>
+                    <div id="romaDecay" class="roma-world__decay"></div>
                     <div id="romaProps" class="roma-world__props"></div>
                     <div id="romaNpcs" class="roma-world__npcs"></div>
                     <div id="romaActors" class="roma-world__actors"></div>
@@ -34,7 +33,9 @@
                 </div>
                 <button id="romaReset" class="roma-hud__reset" type="button">Reiniciar Roma</button>
                 <button id="romaMap" class="roma-hud__reset" type="button" aria-label="Abrir mapa e locais visitados">Mapa · M</button>
+                <button id="romaBook" class="roma-hud__reset" type="button" aria-label="Consultar os livros de Renato">Livros · B</button>
             </header>
+            <div id="romaMemoryStatus" class="roma-memory-status"></div>
             <div id="romaRoute" class="roma-route" aria-live="polite"></div>
             <div id="romaCombatStatus" class="roma-combat-status" hidden></div>
             <div id="romaTransition" class="roma-transition" role="status" hidden></div>
@@ -43,7 +44,7 @@
             <div id="romaMapPanel" class="roma-map" role="dialog" aria-modal="true" aria-labelledby="romaMapTitle" hidden>
                 <section class="roma-map__card">
                     <h2 id="romaMapTitle">Caminhos de Roma</h2>
-                    <p>Mercado ↔ Foro ↔ Coliseu ↔ Arena<br>Rua dos artesãos ↔ Bairro · Oficina · Pátio</p>
+                    <p>Mercado ↔ Foro ↔ Coliseu ↔ Arena<br>Rua dos artesãos ↔ Bairro · Oficina · Pátio<br>Foro ↔ Interior do Senado</p>
                     <p id="romaMapHint"></p>
                     <p id="romaMapCount"></p>
                     <p>Depois de conhecer um lugar, use este mapa para voltar até ele.</p>
@@ -83,8 +84,8 @@
             <div id="endingPanel" class="ending-panel" role="dialog" aria-modal="true" aria-labelledby="endingTitle" hidden>
                 <div class="ending-panel__card">
                     <span>MEMÓRIA 01 CONCLUÍDA</span>
-                    <h2 id="endingTitle">A queda começou aqui.</h2>
-                    <p>Renato recuperou o fragmento, mas suas escolhas transformaram uma ordem quebrada em pânico, abandono e conflito. Roma não caiu de uma só vez — ela começou a ceder diante dele.</p>
+                    <h2 id="endingTitle">A história voltou ao lugar.</h2>
+                    <p>Renato recuperou a folha, consultou os dois livros e corrigiu cinco registros adulterados. O saque de 410 e a deposição de 476 voltaram a ocupar suas próprias páginas. A memória está estável; a história não foi apagada.</p>
                     <a href="teste-escola.html">Voltar ao Cofre</a>
                     <button id="romaKeepExploring" type="button">Continuar explorando Roma</button>
                 </div>
@@ -100,6 +101,9 @@
     </main>
 
     <noscript>Ative o JavaScript para jogar a memória de Roma.</noscript>
-    <script src="js/roma.js?v=roma-explore-4"></script>
+    <script src="js/roma-history-data.js?v=7"></script>
+    <script src="js/roma-history.js?v=7"></script>
+    <script src="js/roma.js?v=roma-mechanics-7"></script>
 </body>
 </html>
+

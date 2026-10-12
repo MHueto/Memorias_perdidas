@@ -34,26 +34,65 @@ button { touch-action: manipulation; }
 }
 .roma-viewport { position: absolute; inset: 0; overflow: hidden; outline: none; background: #0e101a; -webkit-tap-highlight-color: transparent; }
 .roma-viewport:focus-visible { box-shadow: inset 0 0 0 3px var(--roma-cyan); }
-.roma-viewport::after { position: absolute; z-index: 14; inset: 0; content: ""; pointer-events: none; background: linear-gradient(90deg, rgba(3, 6, 14, 0.38), transparent 16%, transparent 84%, rgba(3, 6, 14, 0.38)), linear-gradient(180deg, rgba(2, 4, 11, 0.05), transparent 48%, rgba(2, 4, 11, 0.3)); }
+/* Todas as camadas compartilham a mesma origem para manter pés e portas alinhados. */
+.roma-world { position:absolute; top:0; left:0; transform-origin:top left; will-change:transform; }
+.roma-world__npcs,.roma-world__actors { position:absolute; inset:0; pointer-events:none; }
+.roma-world__npcs { z-index:5; }
+.roma-world__actors { z-index:7; }
+/* --- MELHORIAS DE ATMOSFERA E PARALLAX --- */
+.roma-viewport::after {
+    position: absolute;
+    z-index: 14;
+    inset: 0;
+    content: "";
+    pointer-events: none;
+    /* Camada de cor para unificar a arte da IA (Tons de sépia/noite) */
+    background: linear-gradient(180deg, rgba(20, 10, 10, 0.3) 0%, transparent 40%, rgba(10, 5, 5, 0.5) 100%),
+                radial-gradient(circle at center, transparent 20%, rgba(0, 0, 0, 0.4) 100%);
+    mix-blend-mode: multiply;
+}
 
-.roma-world { position: absolute; top: 0; left: 0; transform-origin: top left; will-change: transform; }
-.roma-world__background { position: absolute; inset: 0; background-position: left top; background-size: 100% 100%; background-repeat: no-repeat; image-rendering: pixelated; }
-.roma-world[data-area="city"] .roma-world__background { background-image: url("../assets/images/roma/entrada-roma-pixelart-v1.png"); }
-.roma-world[data-area="forum"] .roma-world__background { background-image: url("../assets/images/roma/foro-senado-pixelart-v1.png"); }
-.roma-world[data-area="colosseum"] .roma-world__background { background-image: url("../assets/images/roma/coliseu-exterior-pixelart-v1.png"); }
-.roma-world[data-area="arena"] .roma-world__background { background-image: url("../assets/images/roma/arena-coliseu-pixelart-v1.png"); }
-.roma-world__atmosphere { position: absolute; z-index: 2; inset: 0; pointer-events: none; overflow: hidden; }
-.roma-world[data-city-state="2"] .roma-world__atmosphere { background: linear-gradient(90deg, rgba(98, 41, 20, 0.08), transparent 35%, rgba(38, 25, 22, 0.12)); }
-.roma-world[data-city-state="3"] .roma-world__atmosphere { background: linear-gradient(90deg, rgba(45, 30, 25, 0.28), transparent 28%, rgba(94, 36, 17, 0.23)), repeating-linear-gradient(112deg, transparent 0 130px, rgba(36, 18, 12, 0.16) 132px 147px); }
-.roma-world[data-city-state="4"] .roma-world__atmosphere,
-.roma-world[data-city-state="5"] .roma-world__atmosphere { background: radial-gradient(ellipse at 16% 18%, rgba(76, 72, 70, 0.54), transparent 24%), radial-gradient(ellipse at 72% 25%, rgba(89, 66, 50, 0.52), transparent 25%), linear-gradient(180deg, rgba(53, 26, 21, 0.26), rgba(14, 9, 11, 0.2)); animation: smoke-drift 6s ease-in-out infinite alternate; }
-.roma-world[data-city-state="5"] .roma-world__atmosphere::after { position: absolute; inset: 43% 0 0; content: ""; background: repeating-linear-gradient(90deg, transparent 0 120px, rgba(255, 69, 23, 0.2) 128px 145px, transparent 155px 265px); mix-blend-mode: screen; animation: fire-flicker 720ms steps(2,end) infinite; }
+/* Efeito de profundidade nas camadas */
+.roma-world__background {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background-position: left top;
+    background-size: cover;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    will-change: transform;
+    transition: transform 0.1s ease-out; /* Suaviza o movimento do fundo */
+}
 
-.roma-world__props, .roma-world__npcs, .roma-world__actors { position: absolute; z-index: 4; inset: 0; pointer-events: none; }
-.roma-world__npcs { z-index: 5; }
-.roma-world__actors { z-index: 7; }
+.roma-world__atmosphere {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    will-change: transform;
+}
 
-.renato-roma { position: absolute; z-index: 9; width: 90px; height: 90px; background: url("../assets/images/renato/renato-walk-spritesheet-v4.png") 0 100% / 800% 200% no-repeat; image-rendering: pixelated; filter: brightness(0.94) saturate(0.84) contrast(1.06) drop-shadow(0 4px 1px rgba(0,0,0,.55)); will-change: transform, background-position; }
+.roma-world__props {
+    position: absolute;
+    z-index: 3;
+    inset: 0;
+    pointer-events: none;
+    will-change: transform;
+}
+
+/* Ajuste no Renato para ele se destacar do fundo */
+.renato-roma {
+    position: absolute;
+    z-index: 9;
+    width: 90px;
+    height: 90px;
+    background: url("../assets/images/renato/renato-walk-spritesheet-v4.png") 0 100% / 800% 200% no-repeat;
+    image-rendering: pixelated;
+    filter: brightness(1.1) saturate(1.1) drop-shadow(0 4px 4px rgba(0,0,0,0.7));
+    will-change: transform, background-position;
+}
 
 .roma-npc {
     position: absolute;
@@ -236,8 +275,9 @@ button { touch-action: manipulation; }
     background:repeating-linear-gradient(0deg,transparent 0 23px,#332c2b 24px 26px),repeating-linear-gradient(90deg,#514942 0 65px,#2f2926 66px 69px,#494139 70px 128px);
     box-shadow:inset 0 4px #8d7b5b,inset 0 9px #332b26;
 }
-.roma-prop--memory {background:none;border:0;clip-path:none;box-shadow:none;animation:none;}
-.roma-prop--memory.is-retrieved {background:#97e9ff;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:0 0 20px #74dfff;}
+.roma-prop--memory {width:40px;height:20px;border:2px solid #806348;border-radius:0;clip-path:polygon(0 12%,86% 0,100% 35%,93% 100%,9% 89%);background:repeating-linear-gradient(0deg,transparent 0 4px,#725334 5px 6px,transparent 7px 8px) 7px 4px / 23px 11px no-repeat,#e9d399;box-shadow:3px 3px 0 #422d2180;animation:none;transform:rotate(-7deg);z-index:8;}
+.roma-prop--memory::after {content:'';position:absolute;right:0;top:0;width:7px;height:6px;border-left:2px solid #947547;border-bottom:2px solid #947547;background:#fff1c4;}
+.roma-prop--memory.is-retrieved {filter:brightness(1.15);}
 .roma-lasso {border:0;height:5px;opacity:1;pointer-events:none;}
 .roma-lasso.is-thrown {animation:none;}
 .roma-lasso i {display:block;width:100%;height:100%;border-top:4px dashed #e6c786;opacity:0;transform-origin:left center;}
