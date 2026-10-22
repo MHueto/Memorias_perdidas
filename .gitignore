@@ -1,0 +1,27 @@
+# Arquivos locais: nunca enviar credenciais ao repositório.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Dependências, relatórios e arquivos temporários de desenvolvimento.
+node_modules/
+coverage/
+playwright-report/
+test-results/
+*.log
+*.tmp
+*.bak
+*~
+
+# Preferências pessoais e arquivos do sistema operacional.
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Material de trabalho local; os recursos do jogo continuam em assets/.
+/work/
+/outputs/

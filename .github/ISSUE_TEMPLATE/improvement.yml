@@ -1,0 +1,23 @@
+name: Sugestão ou correção histórica
+description: Sugira uma melhoria ou indique conteúdo histórico que precisa ser revisto.
+title: "[Sugestão] "
+body:
+  - type: textarea
+    id: proposal
+    attributes:
+      label: O que você gostaria de melhorar?
+      description: Indique a parte do jogo e explique a mudança.
+    validations:
+      required: true
+  - type: textarea
+    id: benefit
+    attributes:
+      label: Como isso ajuda o jogador?
+      description: Pode ser uma melhoria de aprendizagem, jogabilidade, acessibilidade ou apresentação.
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Referências históricas ou exemplos
+      description: Para correções históricas, inclua autor, título e link ou página da fonte, se disponíveis.

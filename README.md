@@ -4,7 +4,9 @@
 
 ### [Jogar no navegador →](https://mhueto.github.io/Memorias_perdidas/)
 
-[Testar diretamente a fase de Roma](https://mhueto.github.io/Memorias_perdidas/roma.html?intro=1) · [Relatar um problema](https://github.com/MHueto/Memorias_perdidas/issues)
+[Testar diretamente a fase de Roma](https://mhueto.github.io/Memorias_perdidas/roma.html?intro=1) · [Relatar um problema](https://github.com/MHueto/Memorias_perdidas/issues/new/choose) · [Guias do projeto](docs/README.md)
+
+[![Verificar projeto](https://github.com/MHueto/Memorias_perdidas/actions/workflows/verify.yml/badge.svg)](https://github.com/MHueto/Memorias_perdidas/actions/workflows/verify.yml)
 
 > **Protótipo em desenvolvimento.** A versão disponível reúne a introdução na escola, o Cofre das Memórias e a primeira fase histórica, ambientada em 475–476 d.C. É possível jogar sem instalar o projeto ou criar uma conta.
 
@@ -103,8 +105,22 @@ Memorias_perdidas/
 ├── js/                    Movimento, diálogos, investigação e mapa
 ├── assets/                Cenários, sprites e outros recursos
 ├── docs/                  Pesquisa histórica e documentação
+├── scripts/               Verificação de arquivos e testes do verificador
+├── .github/               Formulários de problemas e verificação automática
+├── CONTRIBUTING.md        Orientações para contribuir
 └── .nojekyll              Publicação estática pelo GitHub Pages
 ```
+
+Para localizar a lógica de cada cena, ajustar a altura do chão ou trocar imagens, consulte o **[guia de desenvolvimento](docs/DESENVOLVIMENTO.md)**. O **[índice da documentação](docs/README.md)** separa o funcionamento atual dos registros de versões anteriores.
+
+Com Node.js 24 instalado, é possível conferir o projeto sem instalar pacotes:
+
+```bash
+node --test scripts/check-project.test.cjs
+node scripts/check-project.cjs
+```
+
+A verificação confere sintaxe e referências locais, incluindo diferenças de maiúsculas/minúsculas nos nomes. Ela também roda no GitHub, mas não substitui jogar e testar as interações. Veja [como contribuir](CONTRIBUTING.md).
 
 ## Publicação da demonstração
 
@@ -114,7 +130,7 @@ Consulte [Settings → Pages](https://github.com/MHueto/Memorias_perdidas/settin
 
 ## Encontrou um problema?
 
-[Abra uma issue](https://github.com/MHueto/Memorias_perdidas/issues/new) com:
+[Abra uma issue usando os formulários](https://github.com/MHueto/Memorias_perdidas/issues/new/choose) com:
 
 - O ambiente em que aconteceu: escola, cofre ou nome da área de Roma.
 - O que você fez antes do problema.

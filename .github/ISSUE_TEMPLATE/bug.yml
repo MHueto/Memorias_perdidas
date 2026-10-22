@@ -1,0 +1,55 @@
+name: Problema no jogo
+description: Conte onde o jogo travou, não carregou ou se comportou de forma inesperada.
+title: "[Problema] "
+body:
+  - type: markdown
+    attributes:
+      value: "Obrigado por testar! Não inclua senhas, dados pessoais ou arquivos privados."
+  - type: dropdown
+    id: area
+    attributes:
+      label: Onde aconteceu?
+      options:
+        - Menu principal
+        - Escola
+        - Cofre das Memórias
+        - Roma
+        - Outro lugar
+    validations:
+      required: true
+  - type: input
+    id: location
+    attributes:
+      label: Sala, etapa ou objetivo
+      placeholder: "Ex.: arena do Coliseu, ao lançar o laço."
+  - type: textarea
+    id: steps
+    attributes:
+      label: Como chegar ao problema?
+      description: Descreva os passos desde a abertura do jogo.
+      placeholder: "1. Abri... 2. Entrei em... 3. Pressionei..."
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: O que aconteceu e o que deveria acontecer?
+      description: Pode anexar uma captura de tela aqui.
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Aparelho e navegador
+      placeholder: "Ex.: Android, Chrome, tela na horizontal; ou Windows, Firefox."
+    validations:
+      required: true
+  - type: dropdown
+    id: version
+    attributes:
+      label: Qual versão você estava usando?
+      options:
+        - Demonstração no GitHub Pages
+        - Cópia local no computador
+    validations:
+      required: true
