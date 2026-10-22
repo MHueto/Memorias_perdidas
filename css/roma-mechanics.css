@@ -107,3 +107,41 @@
  .roma-memory-status{bottom:64px;font-size:11px;}
 }
 @media(prefers-reduced-motion:reduce){.roma-decay--fire,.roma-decay--smoke,.roma-prop--straw-glint{animation:none;}.is-restoring .roma-viewport::before{display:none;}}
+
+/* Story v8: same sprite, matched lighting and a pixel-stepped contact shadow. */
+.renato-roma {
+    filter:brightness(.94) saturate(.84) contrast(1.03) sepia(.08) drop-shadow(1px 1px 0 #211b1870);
+}
+.renato-shadow {
+    position:absolute;left:0;top:0;width:38px;height:6px;z-index:8;pointer-events:none;
+    background:#231a19;opacity:.38;
+    clip-path:polygon(15% 0,85% 0,85% 20%,100% 20%,100% 80%,85% 80%,85% 100%,15% 100%,15% 80%,0 80%,0 20%,15% 20%);
+}
+.roma-world[data-area="ravennaCourt"] .roma-world__atmosphere {opacity:.12;}
+.roma-prop--false-seal,.roma-prop--sealed-accounts {
+    width:30px;height:40px;border:3px solid #625134;background:#c6b184;
+    box-shadow:3px 3px 0 #251e2350;transform:rotate(-8deg);
+}
+.roma-prop--false-seal::before,.roma-prop--sealed-accounts::before {
+    content:"";position:absolute;left:4px;right:4px;top:7px;height:3px;background:#675239;
+    box-shadow:0 6px 0 #675239,0 12px 0 #675239;
+}
+.roma-prop--false-seal::after,.roma-prop--sealed-accounts::after {
+    content:"";position:absolute;bottom:2px;right:2px;width:9px;height:9px;background:#943f35;box-shadow:2px 2px 0 #532d29;
+}
+.roma-study__journal {border-top:2px solid #a79672;margin-top:24px;padding-top:16px;}
+.roma-study__journal summary {cursor:pointer;min-height:44px;padding:10px 0;font-weight:700;}
+.roma-study__testimony {border-left:3px solid #52776c;padding:4px 14px;margin:16px 0;}
+.roma-study__testimony h4 {margin:4px 0;font-size:14px;}
+.roma-study__testimony p {margin:8px 0;}
+.roma-dialogue__text {font-size:16px;line-height:1.5;}
+.roma-dialogue__box {max-height:calc(100dvh - 28px);overflow:auto;}
+.roma-dialogue__continue:focus-visible {outline:3px solid #f4d884;outline-offset:3px;}
+.roma-dialogue__continue {min-width:128px;min-height:48px;}
+.ending-panel__card {max-height:calc(100dvh - 28px);overflow:auto;}
+.ending-panel p,.craft-panel p {font-size:16px;}
+@media (max-width:620px),(max-height:500px) {
+    .roma-dialogue__text {font-size:16px;line-height:1.45;}
+    .roma-dialogue__box {padding:14px 18px;gap:8px;}
+    .roma-dialogue__continue {font-size:14px;}
+}

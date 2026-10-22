@@ -7,6 +7,9 @@
     const MEMORY_Y = 560;
     const ARENA_GATE_X = 1500;
     let historyUI;
+    let atlas;
+    let mapInert=[];
+    let compassClock=0;
     let decaySaveClock = 0;
     const RENATO_SPRITE_SHEET = 'assets/images/renato/renato-walk-spritesheet-v4.png';
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -20,7 +23,8 @@
         workshop: { width:1536,height:768,floorY:638,startX:180,label:'Oficina do artesão' },
         residential: { width:1536,height:768,floorY:578,startX:180,label:'Bairro residencial' },
         courtyard: { width:1536,height:768,floorY:636,startX:180,label:'Pátio da fonte' },
-        senateHall: {width:1536,height:768,floorY:606,startX:180,label:'Interior do Senado'}
+        senateHall: {width:1536,height:768,floorY:606,startX:180,label:'Senado de Roma'},
+        ravennaCourt: {width:1536,height:768,floorY:606,startX:300,label:'Ravena · corte imperial (reconstituição)'}
     };
 
     // Every doorway has an explicit destination and return position; no guessed room pairing.
@@ -28,6 +32,7 @@
         city:[{x:500,to:'artisans',spawn:180,label:'RUA DOS ARTESÃOS'}],
         forum:[{x:1040,to:'residential',spawn:180,label:'BAIRRO RESIDENCIAL'},{x:1590,to:'senateHall',spawn:190,label:'SENADO'}],
         senateHall:[{x:170,to:'forum',spawn:1590,label:'VOLTAR AO FORO'}],
+        ravennaCourt:[{x:170,to:'forum',spawn:310,label:'VIAJAR DE VOLTA A ROMA'}],
         artisans:[{x:960,to:'workshop',spawn:180,label:'OFICINA DO ARTESÃO'}],
         residential:[{x:1110,to:'courtyard',spawn:180,label:'PÁTIO DA FONTE'}],
         workshop:[{x:160,to:'artisans',spawn:960,label:'VOLTAR À RUA'}],
@@ -42,7 +47,8 @@
         workshop:{left:{to:'artisans',spawn:960,label:'RUA DOS ARTESÃOS'}},
         residential:{left:{to:'forum',spawn:1040,label:'FORO'},right:{to:'artisans',spawn:1400,label:'RUA DOS ARTESÃOS',turnBack:true}},
         courtyard:{left:{to:'residential',spawn:1110,label:'BAIRRO'}},
-        senateHall:{left:{to:'forum',spawn:1590,label:'FORO'}}
+        senateHall:{left:{to:'forum',spawn:1590,label:'FORO'}},
+        ravennaCourt:{left:{to:'forum',spawn:310,label:'VOLTAR A ROMA'}}
     };
 
     const sprites = {
@@ -51,10 +57,11 @@
     };
 
     const briefing = [
-        { speaker: 'PEDRO NEVES', text: 'Renato, você atravessou a primeira memória instável. Esta é Roma, pouco antes de uma ruptura capaz de mudar tudo.' },
-        { speaker: 'PEDRO NEVES', text: 'O fragmento perdido está dentro do Coliseu. Há um espetáculo em curso, e entrar na arena sem observar o ambiente seria perigoso.' },
-        { speaker: 'PEDRO NEVES', text: 'Encontre um caminho seguro. Você trouxe dois livros: use o botão Livros ou B para comparar as memórias com os registros históricos.' },
-        { speaker: 'RENATO', text: 'Vou entender o que está acontecendo no Coliseu antes de agir.' }
+        {speaker:'PEDRO NEVES',text:'Renato, você chegou a Roma em 475 d.C. A memória deveria avançar até a deposição de Rômulo Augústulo em 476, mas está presa: alguma interferência impede esse desfecho.'},
+        {speaker:'PEDRO NEVES',text:'Seus dois livros contêm os registros originais. Não os altere. Ouça os moradores, examine documentos e compare as pistas para descobrir o que bloqueia os acontecimentos.'},
+        {speaker:'PEDRO NEVES',text:'Os moradores não sabem nada sobre o Cofre. Para eles, esta é a vida cotidiana. Só você pode comparar o que vê com a história registrada nos livros.'},
+        {speaker:'PEDRO NEVES',text:'A folha perdida no Coliseu é a primeira pista. O desafio dos leões é ficcional, assim como nossa viagem. As rachaduras que surgirem mostram a memória se desfazendo, não Roma inteira sendo destruída em 476.'},
+        {speaker:'RENATO',text:'Vou recuperar a folha sem entrar na arena e descobrir por que essa memória não chega ao fim.'}
     ];
     const arenaWarning = [
         { speaker: 'RENATO', text: 'A memória está ali, mas os leões dominam a areia. Da grade eu consigo observar; entrar na jaula seria impossível.' },
@@ -65,17 +72,17 @@
         { speaker: 'RENATO', text: 'Palha leve… talvez eu consiga montar alguma coisa que pareça um alvo de longe.' }
     ];
     const ropeHint = [
-        { speaker: 'CORDEIRO', text: 'Esse laço é resistente o bastante para puxar cargas, mas não desperdice: ele sempre volta para quem souber lançar.' },
+        { speaker: 'CORDOEIRO', text: 'Esse laço é resistente o bastante para puxar cargas, mas não desperdice: ele sempre volta para quem souber lançar.' },
         { speaker: 'RENATO', text: 'É exatamente o que preciso para alcançar a memória sem entrar na areia.' }
     ];
     const storyObjectives = {
-        senate:'Entre no Senado, no Foro, e examine a folha com Lúcio.',
-        emperorAudience:'Converse com a projeção de Teodósio e confira o decreto de 382.',
-        treatyDispatch:'Leve o decreto ao mensageiro no lado esquerdo do Foro.',
-        warnMarket:'Procure a mercadora no mercado para entender o cerco.',
-        siegeCouncil:'Volte ao interior do Senado e confira o destino da carta.',
-        witness410:'Vá ao portão do mercado para acompanhar a memória de 410.',
-        aftermath:'Examine a última página junto ao portão do mercado.'
+        senate:'Fale com Lúcio no Senado e compare o salvo-conduto com o livro de 475.',
+        supplyInquiry:'Ouça a mercadora no mercado e investigue as contas do armazém.',
+        militaryPetition:'Procure o mensageiro no lado esquerdo do Foro: há uma petição retida.',
+        routeInquiry:'Leve a petição a Lúcio e descubra por que as mensagens não chegam à corte.',
+        travelRavenna:'Volte ao mensageiro no Foro para viajar até Ravena.',
+        aftermath:'Em Ravena, converse com Rômulo e confronte a última ordem com seus livros.',
+        deposition:'Acompanhe o desfecho de 476.'
     };
     const historySteps = Object.keys(storyObjectives);
     const viewport = document.querySelector('#romaViewport');
@@ -127,32 +134,38 @@
     if (!areas[state.area]) { state.area = 'city'; state.x = areas.city.startX; }
     state.x=Number.isFinite(Number(state.x))?Math.min(areas[state.area].width-45,Math.max(45,Number(state.x))):areas[state.area].startX;
     state.discoveries={...(state.discoveries||{})};
+    state.navigationTarget=areas[state.navigationTarget]?state.navigationTarget:null;
     state.visitedAreas = [...new Set(['city', state.area, ...(Array.isArray(state.visitedAreas) ? state.visitedAreas.filter(key => areas[key]) : [])])];
     // Old saves can resume safely: a distraction is replayed, never restored halfway through a timer.
     if (state.step === 'lassoAim' && !state.items.rope) state.step = 'distract';
     state.lionsDistracted = state.step === 'lassoAim';
 
-    // Migration is additive: keep collected items and discovered routes.
-    const historicalIds=['adrianople','alliance','division','siege','aftermath'];
-    const chapterIds=['crisis378','treaty382','division395','siege410','legacy476'];
+    // Version 8 replaces the old 378–410 story, never the player's collected resources.
+    const historicalIds=['power475','resources','army476','ravenna476','legacy476'];
+    const chapterIds=['west475','resources','army476','ravenna476','legacy476'];
     const oldHistory=state.history && typeof state.history==='object'?state.history:{};
+    const currentHistory=oldHistory.version===8;
+    state.encounters=state.encounters&&typeof state.encounters==='object'?state.encounters:{};
+    state.testimonies=Array.isArray(state.testimonies)?state.testimonies.filter(n=>n&&typeof n.id==='string'&&typeof n.text==='string').slice(-50):[];
     state.history={
-        version:7,
-        noted:Array.isArray(oldHistory.noted)?oldHistory.noted.filter(id=>chapterIds.includes(id)):[],
-        answers:Array.isArray(oldHistory.answers)?oldHistory.answers.filter(id=>historicalIds.includes(id)):[],
-        activeMs:Math.max(0,Math.min(Number(oldHistory.activeMs)||0,900000)),
-        stage:Math.max(1,Math.min(Number(oldHistory.stage)||1,5)),
-        epoch:oldHistory.epoch||'378',
-        attempts:Number(oldHistory.attempts)||0
+        version:8,
+        noted:currentHistory&&Array.isArray(oldHistory.noted)?[...new Set(oldHistory.noted.filter(id=>chapterIds.includes(id)))]:[],
+        answers:currentHistory&&Array.isArray(oldHistory.answers)?[...new Set(oldHistory.answers.filter(id=>historicalIds.includes(id)))]:[],
+        activeMs:currentHistory?Math.max(0,Math.min(Number(oldHistory.activeMs)||0,900000)):0,
+        stage:currentHistory?Math.max(1,Math.min(Number(oldHistory.stage)||1,5)):1,
+        epoch:currentHistory&&oldHistory.epoch==='476'?'476':'475',
+        attempts:currentHistory?Math.max(0,Number(oldHistory.attempts)||0):0
     };
-    if(oldHistory.version!==7 && (state.items.memory || state.finished || ['senate','deliverOrder','warnMarket','finalSenate'].includes(state.step))){
+    if(!currentHistory && (state.items.memory||state.finished||historySteps.includes(state.step)||['emperorAudience','treatyDispatch','warnMarket','siegeCouncil','witness410','deliverOrder','finalSenate'].includes(state.step))){
         state.items.memory=true;state.items.dispatch=false;state.finished=false;
-        state.step='senate';state.cityState=2;state.history.stage=2;
-        state.history.answers=[];state.history.epoch='378';
+        state.step='senate';state.history.stage=2;
     }
     if(state.finished && state.history.answers.length<5){state.finished=false;state.step='senate';}
-    state.cityState=Math.max(state.history.stage,Math.min(4,1+Math.floor(state.history.activeMs/150000)));
+    // If the tab closed during the ending, replay the short scene instead of stranding the player.
+    if(!state.finished&&state.history.answers.includes('legacy476')){state.step='deposition';state.area='ravennaCourt';state.x=1020;}
+    state.cityState=state.finished?1:Math.max(state.history.stage,Math.min(4,1+Math.floor(state.history.activeMs/150000)));
     const player = { x: state.x, facing: 'right', moving: false, walkTime: 0 };
+    let objectiveStep=state.step;
     const heldKeys = new Set();
     let displayedSprite = '';
     let previousTime = performance.now();
@@ -194,7 +207,7 @@
     const routeStatus = document.querySelector('#romaRoute');
     const transition = document.querySelector('#romaTransition');
     const cinemaCaption = document.querySelector('#romaCinemaCaption');
-    const backgrounds = { city:'entrada-roma-simples-v6.png', forum:'foro-senado-simples-v6.png', colosseum:'coliseu-exterior-simples-v6.png', arena:'arena-coliseu-simples-v6.png',artisans:'rua-dos-artesaos-simples-v6.png',workshop:'oficina-artesao-simples-v6.png',residential:'bairro-residencial-v4.png',courtyard:'patio-romano-simples-v6.png',senateHall:'senado-interior-simples-v6.png' };
+    const backgrounds = { city:'entrada-roma-simples-v6.png', forum:'foro-senado-simples-v6.png', colosseum:'coliseu-exterior-simples-v6.png', arena:'arena-coliseu-simples-v6.png',artisans:'rua-dos-artesaos-simples-v6.png',workshop:'oficina-artesao-simples-v6.png',residential:'bairro-residencial-v4.png',courtyard:'patio-romano-simples-v6.png',senateHall:'senado-interior-simples-v6.png',ravennaCourt:'senado-interior-simples-v6.png' };
     const imageLoads = new Map();
     function preloadScene(key) {
         if (!imageLoads.has(key)) {
@@ -227,10 +240,13 @@
     }
 
     function setObjective(text) {
+        if(objectiveStep!==state.step)state.navigationTarget=null;
+        objectiveStep=state.step;
         objective.textContent = text;
     }
 
     function setStep(nextStep, objectiveText, checkpointMessage) {
+        if(state.step!==nextStep)state.navigationTarget=null;
         state.step = nextStep;
         if (objectiveText) setObjective(objectiveText);
         if (checkpointMessage) setCheckpoint(checkpointMessage);
@@ -238,11 +254,39 @@
         renderScene();
     }
 
-    function openDialogue(lines, onClose = null) {
+    // Residents know their own troubles, not the Cofre or the altered timeline.
+    const people={
+        'LÚCIO':{id:'lucio',greeting:'Que tipo de roupa é essa, viajante? Nunca vi um tecido assim nos arquivos.'},
+        'MERCADORA':{id:'merchant',greeting:'Que roupas são essas? Esse casaco veio de algum mercado distante?'},
+        'MENSAGEIRO':{id:'messenger',greeting:'Antes de tudo: que roupas são essas? E que calçados estranhos!'},
+        'ARTESÃO':{id:'artisan',greeting:'Que costura diferente! Que tipo de roupa você está usando?'},
+        'TRABALHADOR':{id:'worker',greeting:'Ei, que roupas são essas? Não parecem as de quem trabalha por aqui.'},
+        'CORDOEIRO':{id:'ropemaker',greeting:'Que roupas curiosas! De onde veio esse casaco?'},
+        'RÔMULO AUGÚSTULO':{id:'romulus',greeting:'Que tipo de roupa é essa? Não conheço esse traje. Quem o trouxe à corte?'},
+        'ODOACRO':{id:'odoacer',greeting:'Que roupas são essas, viajante? Não reconheço esse uniforme.'}
+    };
+    function openDialogue(lines, onClose = null, person = null) {
+        const roman=person||lines.map(line=>people[line.speaker]&&({...people[line.speaker],name:line.speaker})).find(Boolean);
+        const first=roman&&!state.encounters[roman.id];
         shell.classList.add('has-modal');
-        dialogueLines = lines;
+        dialogueLines=first?[
+            {speaker:roman.name,text:roman.greeting||'Que tipo de roupas são essas? Você veio de longe?'},
+            {speaker:'RENATO',text:'Sou Renato. Vim de muito longe; estas são as roupas que usamos por lá.'},
+            ...lines
+        ]:lines;
         dialogueStep = 0;
-        dialogueOnClose = onClose;
+        dialogueOnClose=()=>{
+            if(roman){
+                state.encounters[roman.id]=true;
+                const line=lines.find(l=>l.speaker===roman.name);
+                if(line&&!state.testimonies.some(t=>t.id===roman.id&&t.text===line.text)){
+                    state.testimonies.push({id:roman.id,name:roman.name,text:line.text,epoch:state.history.epoch});
+                    state.testimonies=state.testimonies.slice(-50);
+                }
+                saveGame();
+            }
+            onClose?.();
+        };
         dialogueOpen = true;
         player.moving = false;
         heldKeys.clear();
@@ -267,7 +311,7 @@
         const callback = dialogueOnClose;
         dialogueOnClose = null;
         callback?.();
-        if(!historyUI?.isOpen())viewport.focus({ preventScroll: true });
+        if(!historyUI?.isOpen()&&!dialogueOpen&&!craftOpen&&endingPanel.hidden)viewport.focus({ preventScroll: true });
     }
 
     function openCraft() {
@@ -295,7 +339,7 @@
     }
 
     function itemLabel(item) {
-        return ({ straw: 'Palha', dolls: 'Bonecos de palha', rope: 'Laço', memory: 'Memória de Roma', dispatch: 'Despacho do Senado' })[item];
+        return ({ straw: 'Palha', dolls: 'Bonecos de palha', rope: 'Laço', memory: 'Memória de Roma', dispatch: 'Petição dos soldados' })[item];
     }
 
     function updateInventory() {
@@ -330,9 +374,12 @@
         sprite.style.backgroundImage=`url('assets/images/roma/npcs-simple-${sheet}-v4.png')`;
         node.dataset.variant=type;
         node.dataset.sheet=sheet;
+        const id=options.id||state.area+'-'+type+'-'+x;
+        const name=options.name||({citizen:'MORADOR',merchant:'COMERCIANTE',soldier:'SOLDADO',senator:'ESCRIVÃO',smith:'FERREIRO',neighbor:'MORADORA',messenger:'VIAJANTE',elder:'MORADOR IDOSO'})[type];
+        node.dataset.npcId=id;node.dataset.name=name;
         node.append(sprite);
         const distance = Math.abs(options.distance || 80) * 2;
-        npcActors.push({ node, sprite, x, row,
+        npcActors.push({ node, sprite, x, row, id, name, type,
             min: Math.max(80,x-distance), max: Math.min(area().width-80,x+distance),
             direction: options.distance < 0 ? -1 : 1, walking: !!options.walk,
             clock: npcActors.length*143, pause: 0, speed: options.speed || (state.cityState>=4 ? 125 : type==='elder'?35:type==='messenger'?76:46+npcActors.length%4*6),
@@ -369,7 +416,7 @@
             if (npc.walking && npc.pause<=0) {
                 npc.x=clamp(npc.x+npc.direction*npc.speed*delta/1000,npc.min,npc.max);
                 npc.clock+=Math.abs(npc.x-oldX)*8;
-                if(npc.x===npc.min || npc.x===npc.max) { npc.direction*=-1; npc.pause=450; }
+                if(npc.x===npc.min || npc.x===npc.max) { if(npc.deposition){npc.walking=false;}else{npc.direction*=-1;npc.pause=450;} }
             } else npc.pause-=delta;
             const moving=Math.abs(npc.x-oldX)>.01;
             const frame=moving ? Math.floor(npc.clock/150)%4 : 1;
@@ -545,17 +592,21 @@
             courtyard:[[420,'elder'],[860,'neighbor'],[1190,'messenger']]
         };
         (crowds[state.area]||[]).filter((_,i)=>state.cityState<4||i%2===0).forEach(([x,type],i)=>addNpc(x,type,{walk:true,distance:i%2?-65:85}));
-        if(state.area==='city')addNpc(1050,'neighbor',{talk:true});
+        if(state.area==='city')addNpc(1050,'merchant',{id:'merchant',name:'MERCADORA'});
         if(state.area==='forum') {
             addNpc(1540,'senator',{talk:true});
             if(state.cityState>=3)[345,1660].forEach(x=>addNpc(x,'soldier',{walk:true,distance:45}));
         }
-        if(state.area==='colosseum')addNpc(1660,'soldier',{talk:true});
-        if(state.area==='senateHall') {addNpc(780,'senator',{talk:true});if(state.step==='emperorAudience')addNpc(1200,'senator',{emperor:true});}
-        if(state.area==='forum')addNpc(310,'messenger',{talk:true});
-        if(state.area==='city'&&['aftermath','complete'].includes(state.step)) [340,425,510,600].forEach((x,i)=>addNpc(x,'soldier',{walk:true,distance:380,speed:64+i*5,invader:true}));
-        if(state.area==='artisans')addNpc(340,'smith',{talk:true});
-        if(state.area==='workshop')addNpc(1070,'smith',{talk:true});
+        if(state.area==='colosseum'){addNpc(1660,'soldier',{talk:true});addNpc(390,'smith',{id:'worker',name:'TRABALHADOR'});}
+        if(state.area==='senateHall')addNpc(780,'senator',{id:'lucio',name:'LÚCIO'});
+        if(state.area==='ravennaCourt'){
+            addNpc(1150,'citizen',{id:'romulus',name:'RÔMULO AUGÚSTULO',emperor:!state.finished});
+            addNpc(780,'soldier',{id:'odoacer',name:'ODOACRO'});
+        }
+        if(state.area==='forum'){addNpc(310,'messenger',{id:'messenger',name:'MENSAGEIRO'});addNpc(700,'smith',{id:'ropemaker',name:'CORDOEIRO'});}
+
+        if(state.area==='artisans')addNpc(340,'smith',{id:'artisan',name:'ARTESÃO'});
+        if(state.area==='workshop')addNpc(1070,'smith',{id:'artisan',name:'ARTESÃO'});
     }
 
     function renderScene() {
@@ -576,6 +627,9 @@
         memoryNode = null;
 
         renderCitizens();
+        if(state.area==='senateHall'&&!state.history.answers.includes('power475'))addProp('false-seal',865,area().floorY-60);
+        if(state.area==='city'&&!state.history.answers.includes('resources'))addProp('sealed-accounts',1115,area().floorY-45);
+        if(state.area==='ravennaCourt'&&!state.finished)addProp('false-seal',1220,area().floorY-60);
         if (state.area === 'city') {
             if (state.cityState >= 3) addProp('barricade', 640, area().floorY - 35);
             if (state.cityState >= 4) addProp('barricade', 1510, area().floorY - 35);
@@ -660,14 +714,15 @@
 
     function destination() {
         if(state.finished)return null;
-        if(historySteps.includes(state.step))return ({senate:['senateHall',780],emperorAudience:['senateHall',1200],treatyDispatch:['forum',310],warnMarket:['city',1050],siegeCouncil:['senateHall',780],witness410:['city',600],aftermath:['city',760]})[state.step];
-        return ({travelColosseum:['colosseum',1500],observeArena:['arena',1410],needStraw:['colosseum',330],craftDolls:['workshop',980],findRope:['forum',640],distract:['arena',1200],lassoAim:['arena',1200],senate:['forum',1590],deliverOrder:['forum',310],warnMarket:['city',1050],finalSenate:['forum',1590]})[state.step];
+        if(historySteps.includes(state.step))return ({senate:['senateHall',780],supplyInquiry:['city',1050],militaryPetition:['forum',310],routeInquiry:['senateHall',780],travelRavenna:['forum',310],aftermath:['ravennaCourt',1150],deposition:['ravennaCourt',1150]})[state.step];
+        return ({travelColosseum:['colosseum',1500],observeArena:['arena',1410],needStraw:['colosseum',330],craftDolls:['workshop',980],findRope:['forum',640],distract:['arena',1200],lassoAim:['arena',1200]})[state.step];
     }
 
     function navigationEdges(key) {
-        const links=[...(portals[key]||[])];
-        Object.entries(exits[key]||{}).forEach(([side,exit])=>links.push({...exit,x:side==='left'?60:areas[key].width-60}));
-        if(key==='colosseum')links.push({to:'arena',x:1500});
+        const links=(portals[key]||[]).map(entry=>({...entry,kind:key==='ravennaCourt'?'journey':'door'}));
+        Object.entries(exits[key]||{}).forEach(([side,exit])=>links.push({...exit,kind:key==='ravennaCourt'?'journey':'street',side,x:side==='left'?60:areas[key].width-60}));
+        if(key==='colosseum')links.push({to:'arena',x:1500,kind:'door'});
+        if(key==='forum'&&state.history.answers.includes('ravenna476'))links.push({to:'ravennaCourt',x:310,kind:'journey'});
         return links;
     }
 
@@ -684,14 +739,14 @@
     }
 
     function routeTarget(from=state.area) {
-        const target=destination();if(!target)return null;
+        const target=state.navigationTarget?[state.navigationTarget,state.navigationTarget===state.area?(destination()?.[0]===state.area?destination()[1]:player.x):areas[state.navigationTarget].startX]:destination();if(!target)return null;
         if(from===target[0])return target;
         const path=pathTo(from,target[0]);
         return path?.path.length?[from,path.path[0].x]:null;
     }
 
     function renderRoute() {
-        routeStatus.textContent=area().label;
+        routeStatus.textContent=atlas?atlas.name(state.area):area().label;
         Object.entries(exits[state.area]||{}).forEach(([side,exit])=>{
             if(side==='left'&&(portals[state.area]||[]).some(entry=>entry.x<220&&entry.to===exit.to))return;
             const x=side==='left'?75:area().width-175,text=side==='left'?'← '+exit.label:exit.label+' →';
@@ -712,30 +767,20 @@
     }
 
     function closeMap() {
-        mapOpen=false;mapPanel.hidden=true;shell.classList.remove('has-modal');viewport.focus({preventScroll:true});
+        if(!mapOpen)return;
+        mapOpen=false;atlas.close();mapPanel.hidden=true;shell.classList.remove('has-modal');
+        mapInert.forEach(([node,previous])=>node.inert=previous);mapInert=[];
+        heldKeys.clear();previousTime=performance.now();
+        document.querySelector('#romaCompass').textContent=atlas.compass().text;
+        mapButton.focus({preventScroll:true});
     }
 
     function openMap() {
-        if(dialogueOpen||craftOpen||historyUI?.isOpen()||cutscene||sceneLoading||portalEntering||!endingPanel.hidden||lassoResolving)return;
-        mapOpen=true;heldKeys.clear();mapPanel.hidden=false;shell.classList.add('has-modal');
-        const list=mapPanel.querySelector('.roma-map__locations');list.replaceChildren();
-        const target=destination();
-        const path=target?pathTo(state.area,target[0]):null;
-        document.querySelector('#romaMapHint').textContent=path?.names.length>1?'Caminho do objetivo: '+path.names.map(key=>areas[key].label).join(' → '):target?'O objetivo está nesta área.':'Explore as entradas marcadas com ↑. A memória principal já foi concluída.';
-        document.querySelector('#romaMapCount').textContent=`${state.visitedAreas.length} / ${Object.keys(areas).length} lugares descobertos · ${Object.keys(state.discoveries).length} descobertas opcionais`;
-        Object.entries(areas).forEach(([key,info])=>{
-            const button=document.createElement('button');button.type='button';button.dataset.travel=key;
-            button.disabled=!state.visitedAreas.includes(key);
-            button.textContent=info.label+(key===state.area?' · você está aqui':'')+(button.disabled?' · não visitado':'');
-            if(target?.[0]===key)button.textContent+=' · objetivo';
-            button.addEventListener('click',()=>{
-                closeMap();
-                const spawn=routeTarget(key)?.[1]??({city:500,forum:1040,colosseum:1500,arena:1180,artisans:960,workshop:980,residential:1110,courtyard:680,senateHall:780})[key];
-                setArea(key,spawn);
-            });
-            list.append(button);
-        });
-        mapPanel.querySelector('button:not(:disabled)')?.focus();
+        if(mapOpen||dialogueOpen||craftOpen||historyUI?.isOpen()||cutscene||sceneLoading||portalEntering||!endingPanel.hidden||lassoResolving)return;
+        mapOpen=true;heldKeys.clear();player.moving=false;mapPanel.hidden=false;shell.classList.add('has-modal');
+        mapInert=[...shell.children].filter(node=>node!==mapPanel).map(node=>[node,node.inert]);
+        mapInert.forEach(([node])=>node.inert=true);
+        atlas.open();
     }
 
     function createAim() {
@@ -759,23 +804,19 @@
             if (state.step === 'distract' && within(1100, 470)) return { x: player.x, text: 'BONECOS DE PALHA\n↑ LANÇAR', action: 'dolls' };
             if (state.step === 'lassoAim') return { x: player.x, text: 'MIRE NO FRAGMENTO\nAÇÃO / ESPAÇO', action: 'lasso' };
         }
-        if(state.area==='senateHall'){
-            if(within(780,105))return {x:780,text:'LÚCIO · ARQUIVOS\n↑ / E CONVERSAR',action:state.step==='senate'?'senate':state.step==='siegeCouncil'?'siegeCouncil':'senateInfo'};
-            if(state.step==='emperorAudience'&&within(1200,100))return {x:1200,text:'TEODÓSIO · PROJEÇÃO DE 382\n↑ / E CONVERSAR',action:'emperor'};
-        }
-        if (state.area === 'city') {
-            if(state.step==='witness410'&&within(600,100))return {x:600,text:'PORTÃO · MEMÓRIA DE 410\n↑ / E OBSERVAR',action:'witness'};
-            if(state.step==='aftermath'&&within(760,115))return {x:760,text:'ÚLTIMO REGISTRO\n↑ / E CONFERIR',action:'aftermath'};
-            if (state.step === 'warnMarket' && within(1050, 120)) return { x: 1050, text: 'MERCADORA PREOCUPADA\n↑ CONVERSAR', action: 'merchant' };
-        }
+        if(state.area==='senateHall'&&within(780,105))return {x:780,text:'LÚCIO · ARQUIVOS\n↑ / E CONVERSAR',action:state.step==='senate'?'senate':state.step==='routeInquiry'?'routeInquiry':'senateInfo'};
+        if(state.area==='city'&&within(1050,110))return {x:1050,text:'MERCADORA\n↑ / E CONVERSAR',action:state.step==='supplyInquiry'?'merchant':'merchantInfo'};
+        if(state.area==='ravennaCourt'&&within(1150,95))return {x:1150,text:'RÔMULO AUGÚSTULO\n↑ / E CONVERSAR',action:state.step==='aftermath'?'aftermath':'romulusInfo'};
         if(state.area==='workshop'&&within(980,120))return {x:980,text:'BANCADA DO ARTESÃO\n↑ '+(state.step==='craftDolls'?'FABRICAR':'EXAMINAR'),action:state.step==='craftDolls'?'craft':'workshopInfo'};
         if(state.area==='artisans'&&within(340,70))return {x:340,text:'ARTESÃO\n↑ CONVERSAR',action:'artisanTip'};
         if(state.area==='residential'&&within(530,70))return {x:530,text:'VIZINHANÇA\n↑ OBSERVAR',action:'neighborhood'};
         if(state.area==='courtyard'&&within(700,110))return {x:700,text:'FONTE DO PÁTIO\n↑ EXAMINAR',action:'fountain'};
         if (state.area === 'forum') {
-            if (state.step === 'findRope' && within(640, 118)) return { x: 640, text: 'LAÇO DO CORDEIRO\n↑ PEGAR', action: 'rope' };
-            if(state.step==='treatyDispatch'&&within(310,110))return {x:310,text:'MENSAGEIRO\n↑ / E CONFERIR O MAPA',action:'messenger'};
+            if (state.step === 'findRope' && within(640, 118)) return { x: 640, text: 'LAÇO DO CORDOEIRO\n↑ PEGAR', action: 'rope' };
+            if(within(310,110))return {x:310,text:'MENSAGEIRO\n↑ / E '+(state.history.answers.includes('ravenna476')?'VIAJAR / CONVERSAR':'CONVERSAR'),action:state.step==='militaryPetition'?'messenger':state.history.answers.includes('ravenna476')?'travelRavenna':'messengerInfo'};
         }
+        const npc=npcActors.filter(n=>within(n.x,68)).sort((a,b)=>Math.abs(x-a.x)-Math.abs(x-b.x))[0];
+        if(npc)return {x:npc.x,text:npc.name+'\n↑ / E CONVERSAR',action:'citizen',npc};
         return null;
     }
 
@@ -847,7 +888,7 @@
             setCheckpoint('Memória do Coliseu recuperada');
             showToast('ITEM ADQUIRIDO — MEMÓRIA DE ROMA');
             await setArea('colosseum', 1510);
-            openDialogue([{ speaker: 'PEDRO NEVES', text: 'A folha recuperada tem datas trocadas. Leve-a a Lúcio, dentro do Senado, e use seus livros para conferir o que foi alterado.' }]);
+            openDialogue([{ speaker: 'PEDRO NEVES', text: 'A folha é um salvo-conduto que interfere nas ordens do governo. Lúcio trabalha nos arquivos do Senado. Ouça o que ele diz e compare com os seus registros originais.' }]);
             lassoResolving = false;
         }, prefersReducedMotion ? 40 : 1120);
     }
@@ -876,7 +917,7 @@
             setStep('craftDolls', 'Entre na rua dos artesãos, no mercado, e use a bancada dentro da oficina.', 'Palha coletada');
             showToast('ITEM ADQUIRIDO — PALHA');
         });
-        if (interaction.action === 'craft') openCraft();
+        if (interaction.action === 'craft') openDialogue([{speaker:'ARTESÃO',text:'Quer usar a bancada? Com essa palha e alguns suportes, consigo ajudá-lo a montar bonecos leves.'}],openCraft);
         if (interaction.action === 'rope') openDialogue(ropeHint, () => {
             state.items.rope = true;
             setStep('distract', 'Retorne à arena e use os bonecos de palha para distrair os leões.', 'Laço encontrado');
@@ -884,44 +925,78 @@
         });
         if (interaction.action === 'dolls') throwDolls();
         if (interaction.action === 'lasso') showToast('Use ESPAÇO ou o botão AÇÃO para lançar o laço.');
-        if(interaction.action==='senateInfo')openDialogue([{speaker:'LÚCIO',text:has('memory')?'Os livros distinguem as lembranças das passagens adulteradas. Uma página anotada pode fundamentar uma correção.':'Recupere a folha que está na arena. Depois, compare seus registros com os livros que trouxe.'}]);
+        if(interaction.action==='citizen'){
+            const npc=interaction.npc,known=Object.values(people).find(p=>p.id===npc.id);
+            const talk={
+                citizen:'A cada mudança no comando, esperamos novas ordens. Eu só quero poder trabalhar e voltar para casa em segurança.',
+                merchant:'Não basta ter mercadoria. Preciso pagar o transporte e saber quais rotas continuam seguras.',
+                soldier:state.history.epoch==='475'?'Servimos ao governo, mas também precisamos sustentar nossas famílias. As promessas dos comandantes importam.':'Há soldados exigindo terras. Sem acordo com Orestes, muitos procuram outro comandante.',
+                senator:'O nome do imperador aparece nos documentos. Fazer uma ordem ser obedecida depende também dos homens que comandam as tropas.',
+                smith:'Conserto ferramentas e equipamento militar. Quando os pagamentos atrasam, o problema chega até a minha oficina.',
+                neighbor:'Ainda há água na fonte e gente cuidando das casas. Nossa vida não se resume às decisões da corte.',
+                messenger:'Levar uma carta exige estradas, abrigo e alguém disposto a recebê-la. Uma ordem distante não chega sozinha.',
+                elder:'Já ouvi muitos governantes prometerem tranquilidade. Não consigo prever o que virá; espero que meus netos tenham dias melhores.'
+            };
+            const text=npc.id==='odoacer'?'Os soldados que me seguem querem que suas reivindicações sejam atendidas. Ter o título imperial não basta para conservar o comando.':talk[npc.type];
+            openDialogue([{speaker:npc.name,text}],null,{id:npc.id,name:npc.name,greeting:known?.greeting});
+        }
+        if(interaction.action==='merchantInfo')openDialogue([{speaker:'MERCADORA',text:'Pago pelo transporte e pelas mercadorias antes de vendê-las. Quando as remessas atrasam, não sei como cobrir as cobranças.'}]);
+        if(interaction.action==='messengerInfo')openDialogue([{speaker:'MENSAGEIRO',text:'Carrego pedidos e ordens entre os postos. Quando uma carta volta sem resposta, sou eu que tenho de explicar o atraso.'}]);
+        if(interaction.action==='romulusInfo')openDialogue([{speaker:'RÔMULO AUGÚSTULO',text:state.finished?'Já não governo. Disseram que partirei para viver na Campânia.':'As ordens da corte ainda levam meu nome, mas são os comandantes que dispõem das tropas.'}]);
+        if(interaction.action==='senateInfo')openDialogue([{speaker:'LÚCIO',text:has('memory')?'Tenho permissões que ninguém aceita e remessas sem confirmação. Você trouxe o salvo-conduto?':'Trabalho com os despachos da administração. Uma folha se perdeu perto do Coliseu; preciso dela para conferir as autorizações.'}]);
         if(interaction.action==='senate')openDialogue([
-            {speaker:'LÚCIO',text:'Esta folha põe o saque de Roma em 378. Algo foi trocado. Antes de devolver o registro, encontre uma evidência nos seus livros.'},
-            {speaker:'RENATO',text:'Vou conferir a data e o acontecimento. Não basta adivinhar a resposta.'}
-        ],()=>askHistory('adrianople',()=>{
-            advanceHistory('emperorAudience','382',2);
-            beginCutscene('timeline',3300,'382 d.C. · O Cofre projeta Teodósio no salão. Esta audiência é uma encenação, não um encontro histórico em Roma.');
-        }));
-        if(interaction.action==='emperor')openDialogue([
-            {speaker:'TEODÓSIO · PROJEÇÃO',text:'Meu decreto aparece como uma expulsão de todos os godos. O registro foi adulterado. Como era o acordo?'},
-            {speaker:'RENATO',text:'Preciso consultar o capítulo de 382 e devolver ao texto a proposta correta.'}
-        ],()=>askHistory('alliance',()=>{
-            state.items.dispatch=true;advanceHistory('treatyDispatch','395',2);
-            beginCutscene('timeline',2700,'395 d.C. · A memória avança treze anos. Leve o registro ao mensageiro no Foro.');
-        }));
-        if(interaction.action==='messenger')openDialogue([
-            {speaker:'MENSAGEIRO',text:'O decreto foi recebido. Mas neste mapa, as cortes do Oriente e do Ocidente estão com os nomes trocados.'}
-        ],()=>askHistory('division',()=>{
-            advanceHistory('warnMarket','408–410',3);
-            beginCutscene('timeline',3300,'408–410 d.C. · Outro salto temporal. Cercos e negociações frustradas afetam o abastecimento de Roma.');
+            {speaker:'LÚCIO',text:'Este salvo-conduto exige a assinatura de Nepos, em Ravena. Sem ela, o escrivão recusa até as ordens que chegam de Orestes. É o procedimento que recebi.'},
+            {speaker:'RENATO',text:'Vou conferir quem está no poder nesta data. Talvez esse selo esteja impedindo as ordens de circular.'}
+        ],()=>askHistory('power475',()=>{
+            advanceHistory('supplyInquiry','475',2);
+            openDialogue([{speaker:'RENATO',text:'O selo não combina com meus registros. As ordens agora podem circular. Preciso descobrir se há outras interferências; a mercadora conhece as contas do mercado.'}]);
         }));
         if(interaction.action==='merchant')openDialogue([
-            {speaker:'MERCADORA',text:'Os suprimentos não chegam como antes. Disseram que a corte está aqui no Coliseu, mas isso não faz sentido. Leve esta dúvida a Lúcio.'},
-            {speaker:'RENATO',text:'Vou comparar a carta com os registros do cerco. Não quero mandar a mensagem para o lugar errado.'}
-        ],()=>advanceHistory('siegeCouncil','408–410',3));
-        if(interaction.action==='siegeCouncil')openDialogue([
-            {speaker:'LÚCIO',text:'A carta ao imperador ficou presa em uma rota errada. Consulte seus livros: onde estava a corte de Honório durante essa crise?'}
-        ],()=>askHistory('siege',()=>{
-            advanceHistory('witness410','410',4);
-            showToast('Destino da carta corrigido. Vá ao portão do mercado.');
+            {speaker:'MERCADORA',text:'As cobranças contam com remessas de todas as antigas províncias. Mas várias não chegam. Há um demonstrativo lacrado aqui; mandaram usar apenas esta lista.'},
+            {speaker:'RENATO',text:'Quem controla as províncias também controla suas receitas. Vou conferir essa relação nos meus livros antes de abrir o demonstrativo.'}
+        ],()=>askHistory('resources',()=>{
+            advanceHistory('militaryPetition','476',3);
+            beginCutscene('timeline',3800,'476 d.C. · Meses se passam na memória. O governo enfrenta limites de recursos, disputas pelo comando e exigências de suas tropas.');
         }));
-        if(interaction.action==='witness') {
-            advanceHistory('aftermath','410',5);
-            beginCutscene('invasion',6200,'410 d.C. · Seguidores de Alarico entram em Roma. A memória mostra o saque; não o desaparecimento completo da cidade.');
-        }
+        if(interaction.action==='messenger')openDialogue([
+            {speaker:'MENSAGEIRO',text:'Os soldados pedem terras. Levo a petição, mas o posto a devolve como resolvida antes de ela chegar ao comando. Eles dizem que ainda não receberam resposta.'},
+            {speaker:'RENATO',text:'A petição continua retida. Preciso entender por que essa reivindicação foi importante, não apenas entregar um papel.'}
+        ],()=>askHistory('army476',()=>{
+            state.items.dispatch=true;advanceHistory('routeInquiry','476',3);
+            openDialogue([{speaker:'MENSAGEIRO',text:'Posso levar a petição agora. Consulte Lúcio sobre o endereço; os últimos despachos voltaram sem confirmação.'}]);
+        }));
+        if(interaction.action==='routeInquiry')openDialogue([
+            {speaker:'LÚCIO',text:'Este despacho manda entregar a petição ao imperador, no Coliseu. Não recebi confirmação de nenhuma das entregas. Sem destino confirmado, o mensageiro não parte.'},
+            {speaker:'RENATO',text:'O nome Roma está me confundindo. A cidade e a residência do imperador não precisam ser o mesmo lugar. Meus registros podem esclarecer isso.'}
+        ],()=>askHistory('ravenna476',()=>{
+            advanceHistory('travelRavenna','476',4);
+            openDialogue([{speaker:'LÚCIO',text:'Ravena, então. Vou avisar o mensageiro. Ele pode acompanhá-lo até a corte.'}]);
+        }));
+        if(interaction.action==='travelRavenna')openDialogue([
+            {speaker:'MENSAGEIRO',text:'Partiremos para Ravena. As notícias são graves: Orestes foi derrotado, e as tropas de Odoacro avançam para a corte.'},
+            {speaker:'RENATO',text:'É uma viagem para outra cidade, não uma passagem dentro de Roma. Quero ouvir o que está acontecendo na corte.'}
+        ],async()=>{
+            const arrived=await setArea('ravennaCourt',1020);
+            if(!arrived)return;
+            if(!state.finished)advanceHistory('aftermath','476',4);
+            beginCutscene('timeline',3200,'ROMA → RAVENA · Viagem resumida. Interior de corte estilizado, não uma reprodução arqueológica.');
+        });
         if(interaction.action==='aftermath')openDialogue([
-            {speaker:'PEDRO NEVES',text:'A última página misturou o saque de 410 com uma deposição que veio depois. Confira as duas datas para terminar a restauração.'}
-        ],()=>askHistory('aftermath',finishHistory));
+            {speaker:'RÔMULO AUGÚSTULO',text:'Meu pai não está mais aqui para comandar as tropas. Odoacro chegou, mas continuam exigindo que toda decisão conserve meu poder. Não sei quem fez essa ordem.'},
+            {speaker:'RENATO',text:'Essa exigência mantém tudo parado. Vou comparar o desfecho com meus registros; não posso confundir a queda do governo com o fim de toda a vida romana.'}
+        ],()=>askHistory('legacy476',()=>{
+            state.step='deposition';saveGame();startDeposition();
+        }));
+    }
+
+    function startDeposition(){
+        if(state.area!=='ravennaCourt')return;
+        world.dataset.step='deposition';
+        const ruler=npcActors.find(n=>n.id==='romulus'),commander=npcActors.find(n=>n.id==='odoacer');
+        ruler?.node.classList.remove('is-emperor');
+        propsLayer.querySelector('.roma-prop--false-seal')?.remove();
+        if(commander){commander.walking=true;commander.min=780;commander.max=1020;commander.direction=1;commander.speed=55;commander.deposition=true;}
+        beginCutscene('deposition',6200,'RAVENA, 476 · Odoacro depõe Rômulo Augústulo. A cena é uma encenação. O Oriente e muitos aspectos da vida romana continuam.',finishHistory);
     }
 
     function askHistory(id,callback){
@@ -934,23 +1009,24 @@
     function advanceHistory(step,epoch,stage){
         state.history.epoch=epoch;state.history.stage=stage;
         state.cityState=Math.max(stage,Math.min(4,1+Math.floor(state.history.activeMs/150000)));
-        setStep(step,storyObjectives[step],'Registro de '+epoch);updateHistoryStatus();
+        setStep(step,storyObjectives[step],'Interferência desfeita · '+epoch);updateHistoryStatus();
     }
     function finishHistory(){
-        state.step='complete';state.finished=true;state.history.stage=5;state.cityState=5;state.history.epoch='410 / 476';
-        saveGame();setObjective('Cinco registros restaurados. Consulte os livros ou continue explorando.');
+        state.step='complete';state.finished=true;state.history.stage=1;state.cityState=1;state.history.epoch='476';
+        saveGame();setObjective('Memória estabilizada: cinco interferências desfeitas. Releia os livros e as conversas.');
         renderScene();endingPanel.hidden=false;endingPanel.querySelector('a').focus();
     }
     function updateHistoryStatus(){
         world.dataset.epoch=state.history.epoch;world.dataset.erosion=String(state.cityState);
         world.dataset.activeMs=String(Math.floor(state.history.activeMs));
+        document.querySelector('#romaQuestCount').textContent=state.history.answers.length+'/5';
         const status=document.querySelector('#romaMemoryStatus');
-        status.textContent=state.history.epoch+' d.C. · '+state.history.answers.length+'/5 registros · '+['','íntegra','fissuras','desgaste','ruínas','saque de 410'][state.cityState];
+        status.textContent=state.history.epoch+' d.C. · '+state.history.answers.length+'/5 pistas · '+(state.finished?'memória estável':['','memória íntegra','memória: fissuras','memória: desgaste','memória: erosão','memória: erosão'][state.cityState]);
     }
     function renderDecay(){
         const layer=document.querySelector('#romaDecay');layer.replaceChildren();
         world.dataset.cityState=String(state.cityState);updateHistoryStatus();
-        const level=state.cityState;if(level<2)return;
+        const level=state.cityState;if(level<2||state.area==='ravennaCourt')return;
         const positions={city:[160,700,1360,1850],forum:[190,840,1390,1860],colosseum:[95,875,1240,1910],arena:[210,650,1800],artisans:[260,610,1270],workshop:[410,1150],residential:[280,740,1390],courtyard:[370,1040,1320],senateHall:[340,930,1380]};
         const prop=(kind,x,y)=>{const n=document.createElement('i');n.className='roma-decay roma-decay--'+kind;n.style.left=x+'px';n.style.top=y+'px';layer.append(n);};
         (positions[state.area]||[]).forEach((x,i)=>{
@@ -983,6 +1059,7 @@
         const drawX = Math.round(player.x - PLAYER_SIZE / 2);
         const drawY = Math.round(area().floorY - PLAYER_SIZE - PLAYER_VERTICAL_OFFSET);
         renato.style.transform = `translate(${drawX}px, ${drawY}px)`;
+        document.querySelector('#renatoShadow').style.transform=`translate(${Math.round(player.x-19)}px, ${area().floorY-8}px)`;
         Object.assign(renato.dataset,{x:player.x.toFixed(2),facing:player.facing,frame:String(frame)});
     }
 
@@ -996,7 +1073,7 @@
         let focus=player.x+(player.moving?(player.facing==='right'?75:-75):0);
         if(combat)focus=(combatLeft+combatRight)/2;
         if(cutscene?.kind==='arena')focus=1100;
-        if(cutscene?.kind==='invasion')focus=590;
+        if(cutscene?.kind==='deposition')focus=1020;
         const x=scaledWidth<=cameraWidth?(cameraWidth-scaledWidth)/2:clamp(cameraWidth/2-focus*scale,cameraWidth-scaledWidth,0);
         if(cameraX===null||prefersReducedMotion)cameraX=x;
         else cameraX+=(x-cameraX)*(1-Math.exp(-delta/105));
@@ -1043,6 +1120,8 @@
             if(!cutscene&&!lassoResolving)updateAim(delta);
             if(cutscene){cutscene.clock+=delta;if(cutscene.clock>=cutscene.duration)endCutscene();}
         }
+        compassClock+=delta;
+        if(compassClock>160&&atlas){compassClock=0;const guidance=atlas.compass();const n=document.querySelector('#romaCompass');if(n.textContent!==guidance.text)n.textContent=guidance.text;}
         updatePrompt();
         updateSprite();
         updateCamera(delta);
@@ -1063,9 +1142,9 @@
     function setKey(event, pressed) {
         if(event.defaultPrevented||historyUI?.isOpen())return;
         const key = event.key.toLowerCase();
-        if(key==='tab' && pressed && (dialogueOpen||craftOpen||mapOpen)) {
-            const modal=dialogueOpen?dialogue:craftOpen?craftPanel:mapPanel;
-            const buttons=[...modal.querySelectorAll('button:not(:disabled),a[href]')];
+        if(key==='tab' && pressed && (dialogueOpen||craftOpen||mapOpen||!endingPanel.hidden)) {
+            const modal=dialogueOpen?dialogue:craftOpen?craftPanel:mapOpen?mapPanel:endingPanel;
+            const buttons=[...modal.querySelectorAll('button:not(:disabled),a[href],summary')].filter(node=>node.getClientRects().length);
             const index=buttons.indexOf(document.activeElement);
             event.preventDefault();buttons[(index+(event.shiftKey?-1:1)+buttons.length)%buttons.length]?.focus();return;
         }
@@ -1101,6 +1180,7 @@
         document.querySelector('#romaKeepExploring').addEventListener('click',()=>{endingPanel.hidden=true;heldKeys.clear();setObjective('Memória concluída. Explore as ruas, a oficina e o pátio.');viewport.focus({preventScroll:true});});
         mapButton.addEventListener('click',openMap);
         document.querySelector('#romaCloseMap').addEventListener('click',closeMap);
+        document.querySelector('#atlasBook').addEventListener('click',()=>{closeMap();historyUI.open();});
         document.querySelector('#romaSkip').addEventListener('click',endCutscene);
         resetButton.addEventListener('click', () => { if(confirm('Reiniciar apenas o progresso de Roma?'))window.location.assign('roma.html?reset=1'); });
         document.querySelectorAll('[data-direction]').forEach((button) => {
@@ -1124,8 +1204,8 @@
         try {await preloadScene(state.area);} catch {showToast('O cenário não carregou. Recarregue para tentar novamente.',8000);}
         sceneLoading=false;transition.hidden=true;
         Object.keys(areas).forEach(key=>preloadScene(key).catch(()=>{}));
-        chapter.textContent = 'MEMÓRIA 01 — QUEDA DE ROMA';
-        if (state.finished) { state.cityState = 5; setObjective('Memória de Roma concluída.'); endingPanel.hidden = false; }
+        chapter.textContent = 'MEMÓRIA 01 — OCIDENTE · 475–476 d.C.';
+        if (state.finished) { state.cityState = 1; setObjective('Memória de Roma concluída.'); endingPanel.hidden = false; }
         else if (state.step === 'briefing') {
             setObjective('Aguarde as instruções de Pedro.');
             openDialogue(briefing, () => setStep('travelColosseum', 'Explore Roma e siga pela estrada até o Coliseu.', 'Roma — entrada'));
@@ -1138,25 +1218,33 @@
                 findRope: 'Encontre um laço resistente no Foro Romano.',
                 distract: 'Retorne à arena e use os bonecos de palha para distrair os leões.',
                 lassoAim: 'Mire na folha sobre a areia e pressione ESPAÇO ou AÇÃO para lançar o laço.',
-                senate: 'Leve a memória restaurada ao Senado, no Foro Romano.',
-                deliverOrder: 'Entregue o despacho no posto militar à esquerda do Foro.',
-                warnMarket: 'Volte ao mercado e fale com a comerciante preocupada.',
-                finalSenate: 'Retorne ao Senado. A cidade está entrando em colapso.'
             };
             setObjective(storyObjectives[state.step] || labels[state.step] || 'Explore a memória de Roma.');
         }
         renderScene();
         updateSprite();
         updateCamera();
+        if(state.step==='deposition')startDeposition();
         requestAnimationFrame(animate);
     }
 
     historyUI=window.RomaHistory.create({
-        getState:()=>({noted:state.history.noted,answers:state.history.answers,canOpen:!dialogueOpen&&!craftOpen&&!mapOpen&&!cutscene&&!sceneLoading&&!portalEntering&&!lassoResolving&&endingPanel.hidden}),
+        getState:()=>({noted:state.history.noted,answers:state.history.answers,testimonies:state.testimonies,canOpen:!dialogueOpen&&!craftOpen&&!mapOpen&&!cutscene&&!sceneLoading&&!portalEntering&&!lassoResolving&&endingPanel.hidden}),
         onPause:()=>{heldKeys.clear();player.moving=false;},
         onResume:()=>{heldKeys.clear();previousTime=performance.now();},
         onNote:id=>{if(!state.history.noted.includes(id))state.history.noted.push(id);saveGame();},
         onMistake:()=>{state.history.attempts++;saveGame();}
+    });
+    atlas=window.RomaAtlas.create({
+        areas,names:areas,edges:navigationEdges,
+        getState:()=>({area:state.area,x:player.x,epoch:state.history.epoch,visited:state.visitedAreas,answers:state.history.answers.length,
+            objective:destination(),objectiveText:objective.textContent,pinned:state.navigationTarget,unlockedRavenna:state.history.answers.includes('ravenna476'),
+            items:Object.keys(state.items).filter(key=>has(key)).map(itemLabel)}),
+        onMark:key=>{
+            state.navigationTarget=key;saveGame();
+            propsLayer.querySelectorAll('.roma-prop--route,.roma-prop--entrance,.roma-prop--destination').forEach(node=>node.remove());
+            renderRoute();
+        }
     });
     bindControls();
     start();

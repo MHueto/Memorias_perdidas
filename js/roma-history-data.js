@@ -1,49 +1,223 @@
-/* Textos autorais: datas reais, encenação e viagens no tempo fictícias. */
+/* Conteúdo educativo autoral; referências em cada capítulo. */
 window.ROMA_HISTORY_DATA = {
-  books: ['Crises do Império', 'Roma sob cerco'],
-  note: 'Reconstrução fictícia do Cofre: lugares e décadas se aproximam. Renato corrige registros; ele não causa os acontecimentos históricos. A erosão visual é uma mecânica da memória, não uma reconstrução literal da destruição de Roma.',
-  chapters: [
-    {id:'crisis378',book:0,date:'378',title:'Adrianópolis não foi o fim',
-      paragraphs:['Em 378, o exército de Valente foi derrotado por forças godas em Adrianópolis. O imperador morreu. Foi uma grave crise militar, mas o Império não terminou nessa batalha.',
-      'O saque de Roma comandado por Alarico ocorreu em 410, décadas depois. Uma memória que troca esses acontecimentos precisa ter seu registro corrigido.'],
-      evidence:'378: derrota e morte de Valente em Adrianópolis.',
-      sources:[{title:'A. D. Lee — Adrianople, battle of · The Encyclopedia of Ancient History',url:'https://onlinelibrary.wiley.com/doi/full/10.1002/9781444338386.wbeah19003'}]},
-    {id:'treaty382',book:0,date:'382',title:'Um acordo, não uma expulsão',
-      paragraphs:['Em 382, o governo de Teodósio I negociou um acordo com grupos godos, associado à permanência no Império e ao serviço militar. Seus termos exatos são discutidos pelos historiadores.',
-      '“Bárbaros” era uma classificação romana para povos diferentes. O acordo não foi uma expulsão de todos os godos nem tornou a queda inevitável. A conversa de Renato com o imperador é uma projeção fictícia.'],
-      evidence:'382: negociação, permanência e combatentes a serviço romano.',
-      sources:[{title:'Alenka Cedilnik — The Conclusion of the Roman-Gothic Peace Treaty in 382 · Universidade de Ljubljana (resumo)',url:'https://journals.uni-lj.si/keria/article/view/3873'},{title:'Melinda Székely — Theodosius and the Goths · Universidade de Szeged',url:'https://acta.bibl.u-szeged.hu/49924/1/chronica_017_079-090.pdf'}]},
-    {id:'division395',book:0,date:'395',title:'Duas cortes',
-      paragraphs:['Após a morte de Teodósio em 395, Arcádio governou no Oriente e Honório no Ocidente. Dividir responsabilidades entre imperadores não era uma ideia nova.',
-      'Não houve desaparecimento imediato de todo o Império. O governo romano oriental continuou por séculos; seus habitantes também se consideravam romanos.'],
-      evidence:'395: Arcádio no Oriente; Honório no Ocidente.',
-      sources:[{title:'Christopher S. Lightfoot — The Roman Empire · The Metropolitan Museum of Art',url:'https://www.metmuseum.org/essays/the-roman-empire-27-b-c-393-a-d'},{title:'Sarah T. Brooks — Byzantium · The Metropolitan Museum of Art',url:'https://www.metmuseum.org/essays/byzantium-ca-330-1453'}]},
-    {id:'siege410',book:1,date:'408–410',title:'A corte distante',
-      paragraphs:['Durante a crise que levou ao saque de 410, Honório governava a partir de Ravena. Roma enfrentou cercos, falta de abastecimento e negociações frustradas com Alarico.',
-      'O Senado romano negociava longe da corte imperial. Não existe uma única ordem ou um único povo que explique sozinho toda a crise.'],
-      evidence:'Na crise de 408–410, a corte de Honório estava em Ravena.',
-      sources:[{title:'Donald L. Wasson — Sack of Rome 410 CE · World History Encyclopedia',url:'https://www.worldhistory.org/article/1449/sack-of-rome-410-ce/'}]},
-    {id:'legacy476',book:1,date:'410 / 476',title:'Datas que não se confundem',
-      paragraphs:['Alarico e seus seguidores saquearam Roma em 410. A cidade sofreu danos, mas não desapareceu. Em 476, Odoacro depôs Rômulo Augústulo: outro acontecimento, sessenta e seis anos depois.',
-      '476 é um marco tradicional do fim do Império Romano do Ocidente. O Império do Oriente continuou. Restaurar a memória significa compreender essa sequência, não comemorar a destruição.'],
-      evidence:'410: saque de Alarico. 476: deposição de Rômulo Augústulo por Odoacro.',
-      sources:[{title:'Joshua J. Mark — Odoacer · World History Encyclopedia',url:'https://www.worldhistory.org/Odoacer/'},{title:'Sarah T. Brooks — Byzantium · The Metropolitan Museum of Art',url:'https://www.metmuseum.org/essays/byzantium-ca-330-1453'}]}
+  "version": 8,
+  "books": [
+    "I · Por que o Ocidente enfraqueceu",
+    "II · O desfecho de 476"
   ],
-  questions:[
-    {id:'adrianople',chapterId:'crisis378',title:'A folha da arena',claim:'“Em 378, Alarico saqueou Roma e o Império terminou.”',prompt:'Qual acontecimento deve ocupar o registro de 378?',
-      options:[['sack','Saque de Roma por Alarico.'],['valens','Derrota e morte de Valente em Adrianópolis.'],['deposition','Deposição de Rômulo Augústulo.']],correct:'valens',
-      explanation:'A data de Adrianópolis foi restaurada. O saque de 410 pertence a outra página.'},
-    {id:'alliance',chapterId:'treaty382',title:'O decreto adulterado',claim:'“Teodósio expulsou todos os godos em 382; não houve acordo.”',prompt:'O que Renato deve registrar na audiência?',
-      options:[['expel','Confirmar a expulsão de todos os godos.'],['surrender','Entregar o governo a Alarico em 382.'],['negotiate','Negociar a permanência de grupos godos e seu serviço militar.']],correct:'negotiate',
-      explanation:'O acordo volta ao registro. A integração de combatentes não é uma causa única da queda.'},
-    {id:'division',chapterId:'division395',title:'O mapa de duas cortes',claim:'“Em 395, Honório governou o Oriente e Arcádio governou o Ocidente.”',prompt:'Como corrigir o mapa do mensageiro?',
-      options:[['courts','Arcádio no Oriente; Honório no Ocidente.'],['reverse','Honório no Oriente; Arcádio no Ocidente.'],['ended','Os dois governos terminaram em 395.']],correct:'courts',
-      explanation:'As cortes estão identificadas corretamente. A próxima projeção avança para o cerco.'},
-    {id:'siege',chapterId:'siege410',title:'A carta sem destino',claim:'“Honório está no Coliseu. Enviem a carta para lá.”',prompt:'Para onde deve seguir a mensagem dirigida à corte?',
-      options:[['rome','Para o Coliseu, em Roma.'],['ravenna','Para Ravena.'],['constantinople','Para Constantinopla.']],correct:'ravenna',
-      explanation:'O destino foi corrigido. Roma e a corte imperial não estavam no mesmo lugar.'},
-    {id:'aftermath',chapterId:'legacy476',title:'A última linha da memória',claim:'“Alarico depôs Rômulo Augústulo no saque de 410.”',prompt:'Qual sequência recupera a história?',
-      options:[['reversed','410: Odoacro depõe Honório. 476: Alarico saqueia Roma.'],['instant','382: toda Roma e os dois impérios desaparecem.'],['chronology','410: saque de Alarico. 476: Odoacro depõe Rômulo Augústulo.']],correct:'chronology',
-      explanation:'As datas e os personagens foram separados. As cinco alterações foram corrigidas.'}
+  "note": "Registros originais trazidos por Renato: o conteúdo destes livros não muda. Diálogos, documentos locais e interferências são ficcionais. A erosão do cenário representa a memória instável, não a destruição literal de Roma em 476. A história tem várias causas; os desafios resumem algumas delas.",
+  "chapters": [
+    {
+      "id": "west475",
+      "book": 0,
+      "date": "475",
+      "title": "Um imperador, vários poderes",
+      "paragraphs": [
+        "Em 475, Orestes afastou Júlio Nepos da Itália e colocou seu filho Rômulo Augústulo no trono. Nepos manteve sua reivindicação a partir da Dalmácia. O poder militar de Orestes sustentava o jovem imperador.",
+        "Uma troca no trono não resolveu as disputas pelo comando. Compare quem assina uma ordem com quem realmente consegue fazê-la cumprir."
+      ],
+      "evidence": "475: Rômulo no trono; Orestes controla o exército; Nepos fora da Itália.",
+      "sources": [
+        {
+          "title": "Ralph W. Mathisen / Geoffrey S. Nathan · Romulus Augustulus · De Imperatoribus Romanis (Loyola)",
+          "url": "https://roman-emperors.sites.luc.edu/auggiero.htm"
+        }
+      ]
+    },
+    {
+      "id": "resources",
+      "book": 0,
+      "date": "Século V",
+      "title": "Território, receita e soldados",
+      "paragraphs": [
+        "A perda de territórios retirou receitas do governo ocidental. Menos recursos dificultavam sustentar forças militares e recuperar províncias: perdas e dificuldades de defesa podiam se reforçar. Conflitos internos também consumiam recursos.",
+        "Isso não significa que toda a economia romana tivesse parado. Regiões, grupos sociais e o Oriente tiveram trajetórias diferentes. Historiadores discutem o peso de cada fator; não há uma causa única."
+      ],
+      "evidence": "Menos território tributável → menos receita pública → maior dificuldade de defesa.",
+      "sources": [
+        {
+          "title": "Peter Heather · Empire and development: the fall of the Roman west · History & Policy",
+          "url": "https://historyandpolicy.org/policy-papers/papers/empire-and-development-the-fall-of-the-roman-west/"
+        }
+      ]
+    },
+    {
+      "id": "army476",
+      "book": 1,
+      "date": "476",
+      "title": "A crise dentro do exército",
+      "paragraphs": [
+        "Soldados a serviço do governo romano exigiram terras na Itália. Orestes recusou; tropas passaram a apoiar Odoacro, que derrotou Orestes. O conflito envolvia comando, sustento e acesso à terra, não apenas um ataque vindo de fora.",
+        "“Bárbaros” era um rótulo romano para povos diversos. Muitos desses combatentes já serviam Roma. Sua origem, sozinha, não explica a crise."
+      ],
+      "evidence": "Reivindicação de terras recusada → ruptura de lealdade → apoio militar a Odoacro.",
+      "sources": [
+        {
+          "title": "Joshua J. Mark · Odoacer · World History Encyclopedia",
+          "url": "https://www.worldhistory.org/Odoacer/"
+        }
+      ]
+    },
+    {
+      "id": "ravenna476",
+      "book": 1,
+      "date": "475–476",
+      "title": "Roma não era a corte",
+      "paragraphs": [
+        "A corte de Rômulo Augústulo ficava em Ravena. Roma continuava importante, mas não era o local de residência desse imperador. Odoacro chegou a Ravena no desfecho da crise de 476.",
+        "Distinguir a cidade de Roma do Império Romano ajuda a entender por que a queda política do Ocidente não é o mesmo que a destruição de uma cidade."
+      ],
+      "evidence": "A corte e o desfecho de Rômulo Augústulo: Ravena, não o Coliseu.",
+      "sources": [
+        {
+          "title": "Mathisen / Nathan · Romulus Augustulus · De Imperatoribus Romanis",
+          "url": "https://roman-emperors.sites.luc.edu/auggiero.htm"
+        }
+      ]
+    },
+    {
+      "id": "legacy476",
+      "book": 1,
+      "date": "476 e depois",
+      "title": "O que caiu — e o que continuou",
+      "paragraphs": [
+        "Odoacro depôs Rômulo Augústulo em 476 e passou a governar a Itália. Esse é o marco tradicional do fim do Império Romano do Ocidente. A continuidade da reivindicação de Nepos lembra que mudanças políticas não cabem perfeitamente em uma única data.",
+        "O Império Romano do Oriente continuou, com centro em Constantinopla. Pessoas, práticas e instituições romanas não desapareceram de um dia para o outro. A deposição é um desfecho político de processos mais longos, não a causa de todos eles."
+      ],
+      "evidence": "476: deposição de Rômulo por Odoacro; fim convencional do governo imperial ocidental, não de toda a vida romana.",
+      "sources": [
+        {
+          "title": "Joshua J. Mark · Odoacer · World History Encyclopedia",
+          "url": "https://www.worldhistory.org/Odoacer/"
+        },
+        {
+          "title": "Sarah T. Brooks · Byzantium · Metropolitan Museum of Art",
+          "url": "https://www.metmuseum.org/essays/byzantium-ca-330-1453"
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "power475",
+      "chapterId": "west475",
+      "title": "Quem está impedindo as ordens?",
+      "claim": "Salvo-conduto local: “Só aceitem ordens de Júlio Nepos, residente em Ravena.” O escrivão recusa todas as ordens de Orestes.",
+      "prompt": "Pelos seus registros de 475, qual interferência Renato deve desfazer?",
+      "options": [
+        [
+          "nepos",
+          "Manter a exigência: Nepos ainda controla a corte na Itália."
+        ],
+        [
+          "power",
+          "Retirar a exigência falsa: Orestes governa por meio de Rômulo, e Nepos foi afastado da Itália."
+        ],
+        [
+          "end",
+          "Declarar que o Ocidente já terminou em 475."
+        ]
+      ],
+      "correct": "power",
+      "actionLabel": "Retirar o selo que bloqueia as ordens",
+      "explanation": "O selo falso sustentava uma autoridade que já não governava na Itália. Retirá-lo permite que as ordens voltem a circular. Os livros originais permanecem intactos."
+    },
+    {
+      "id": "resources",
+      "chapterId": "resources",
+      "title": "As contas que nunca fecham",
+      "claim": "Lista do armazém: “Receita ilimitada. Todas as antigas províncias continuam pagando ao governo ocidental.” A mercadora recebe cobranças sobre remessas que não chegam.",
+      "prompt": "O que essa lista apaga das causas da crise?",
+      "options": [
+        [
+          "taxes",
+          "A perda de territórios e receitas que dificultou financiar a defesa."
+        ],
+        [
+          "lazy",
+          "A preguiça de todos os romanos."
+        ],
+        [
+          "instant",
+          "O desaparecimento de toda a agricultura de uma só vez."
+        ]
+      ],
+      "correct": "taxes",
+      "actionLabel": "Deslacrar o demonstrativo verdadeiro",
+      "explanation": "Renato remove a lista imposta pela interferência e entrega as contas locais que estavam lacradas. A pressão sobre os recursos volta a aparecer; ele não provoca uma fome nem reescreve os livros."
+    },
+    {
+      "id": "army476",
+      "chapterId": "army476",
+      "title": "Uma petição que não chega",
+      "claim": "O mensageiro carrega uma petição por terras, mas uma autorização automática a declara “resolvida” antes de chegar ao comando.",
+      "prompt": "Que tensão desapareceria se essa petição fosse sempre silenciada?",
+      "options": [
+        [
+          "foreign",
+          "Um povo inteiramente de fora, que nunca serviu Roma."
+        ],
+        [
+          "land",
+          "O conflito entre as exigências de terras dos soldados e a recusa de Orestes."
+        ],
+        [
+          "arena",
+          "Uma briga pela organização dos jogos do Coliseu."
+        ]
+      ],
+      "correct": "land",
+      "actionLabel": "Liberar a petição retida",
+      "explanation": "A reivindicação pode chegar ao comando. Na sequência histórica, a recusa de Orestes favoreceu a adesão a Odoacro. Renato desfaz o bloqueio fictício; não cria o descontentamento dos soldados."
+    },
+    {
+      "id": "ravenna476",
+      "chapterId": "ravenna476",
+      "title": "Onde encontrar a corte?",
+      "claim": "O endereço no despacho leva todas as mensagens ao Coliseu. Nenhuma chega ao imperador.",
+      "prompt": "Com os registros originais, que caminho Renato deve reabrir?",
+      "options": [
+        [
+          "rome",
+          "Coliseu, porque a corte só poderia estar na cidade de Roma."
+        ],
+        [
+          "ravenna",
+          "Ravena, onde estava a corte de Rômulo Augústulo."
+        ],
+        [
+          "east",
+          "Constantinopla, residência de Rômulo Augústulo."
+        ]
+      ],
+      "correct": "ravenna",
+      "actionLabel": "Reabrir a rota de Ravena",
+      "explanation": "O mensageiro recebe o destino correto. A viagem seguinte resume a distância entre as duas cidades; Ravena não é uma sala do Senado de Roma."
+    },
+    {
+      "id": "legacy476",
+      "chapterId": "legacy476",
+      "title": "Por que a memória não termina?",
+      "claim": "Uma ordem sem origem mantém o poder imperial de Rômulo indefinidamente, mesmo depois da derrota de Orestes e da chegada das tropas de Odoacro.",
+      "prompt": "Qual desfecho os registros originais sustentam?",
+      "options": [
+        [
+          "burn",
+          "Destruir Roma inteira e também o Império do Oriente."
+        ],
+        [
+          "keep",
+          "Manter Rômulo no trono para sempre."
+        ],
+        [
+          "depose",
+          "Permitir a deposição de Rômulo por Odoacro em 476, sem apagar a continuidade da vida romana."
+        ]
+      ],
+      "correct": "depose",
+      "actionLabel": "Desfazer a última interferência",
+      "explanation": "A memória pode seguir o desfecho de 476. Você relacionou disputa pelo poder, recursos e lealdade militar; não atribuiu tudo a um único povo nem à destruição de Roma."
+    }
   ]
 };
+(function freeze(value){Object.values(value).forEach(v=>{if(v&&typeof v==='object')freeze(v);});Object.freeze(value);})(window.ROMA_HISTORY_DATA);

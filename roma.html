@@ -6,8 +6,9 @@
     <meta name="theme-color" content="#111322">
     <title>Memórias Perdidas — Queda de Roma</title>
     <link rel="preload" as="image" href="assets/images/roma/entrada-roma-simples-v6.png">
-    <link rel="stylesheet" href="css/roma.css?v=roma-mechanics-7">
-    <link rel="stylesheet" href="css/roma-mechanics.css?v=7">
+    <link rel="stylesheet" href="css/roma.css?v=roma-story-8">
+    <link rel="stylesheet" href="css/roma-mechanics.css?v=8">
+    <link rel="stylesheet" href="css/roma-interface.css?v=9">
 </head>
 <body class="roma-page">
     <main class="roma-game" aria-label="Memórias Perdidas: Queda de Roma">
@@ -21,36 +22,65 @@
                     <div id="romaNpcs" class="roma-world__npcs"></div>
                     <div id="romaActors" class="roma-world__actors"></div>
                     <div id="romaPrompt" class="roma-world__prompt"><span></span></div>
+                    <div id="renatoShadow" class="renato-shadow"></div>
                     <div id="renatoRoma" class="renato-roma"></div>
                 </div>
             </div>
 
             <header class="roma-hud">
                 <a class="roma-hud__back" href="teste-escola.html">&larr; Cofre</a>
-                <div class="roma-hud__objective" aria-live="polite">
-                    <span id="romaChapter">MEMÓRIA 01 — QUEDA DE ROMA</span>
+                <details id="romaQuest" class="roma-hud__objective" open>
+                    <summary>Investigação <span id="romaQuestCount">0/5</span></summary>
+                    <span id="romaChapter">MEMÓRIA 01 · 475–476 d.C.</span>
                     <strong id="romaObjective">Aguarde as instruções de Pedro.</strong>
-                </div>
-                <button id="romaReset" class="roma-hud__reset" type="button">Reiniciar Roma</button>
-                <button id="romaMap" class="roma-hud__reset" type="button" aria-label="Abrir mapa e locais visitados">Mapa · M</button>
+                </details>
+                <button id="romaMap" class="roma-hud__reset" type="button" aria-label="Abrir mapa de orientação, sem teletransporte">Mapa · M</button>
                 <button id="romaBook" class="roma-hud__reset" type="button" aria-label="Consultar os livros de Renato">Livros · B</button>
             </header>
             <div id="romaMemoryStatus" class="roma-memory-status"></div>
             <div id="romaRoute" class="roma-route" aria-live="polite"></div>
+            <div id="romaCompass" class="roma-compass"></div>
             <div id="romaCombatStatus" class="roma-combat-status" hidden></div>
             <div id="romaTransition" class="roma-transition" role="status" hidden></div>
             <div id="romaCinemaCaption" class="roma-cinema-caption" hidden></div>
             <button id="romaSkip" class="roma-skip" type="button" hidden>Pular · Enter</button>
-            <div id="romaMapPanel" class="roma-map" role="dialog" aria-modal="true" aria-labelledby="romaMapTitle" hidden>
-                <section class="roma-map__card">
-                    <h2 id="romaMapTitle">Caminhos de Roma</h2>
-                    <p>Mercado ↔ Foro ↔ Coliseu ↔ Arena<br>Rua dos artesãos ↔ Bairro · Oficina · Pátio<br>Foro ↔ Interior do Senado</p>
-                    <p id="romaMapHint"></p>
-                    <p id="romaMapCount"></p>
-                    <p>Depois de conhecer um lugar, use este mapa para voltar até ele.</p>
-                    <div class="roma-map__locations"></div>
-                    <button id="romaCloseMap" type="button">Voltar ao jogo · Esc</button>
-                    <small>← → / A D: andar · Shift: correr · ↑ / E: interagir · Espaço: ação</small>
+            <div id="romaMapPanel" class="roma-map roma-atlas" role="dialog" aria-modal="true" aria-labelledby="romaMapTitle" hidden>
+                <section class="atlas-sheet">
+                    <header class="atlas-header">
+                        <div><span class="atlas-eyebrow">CADERNO DE CAMPO · RENATO</span><h2 id="romaMapTitle">Caminhos da memória</h2></div>
+                        <button id="romaCloseMap" type="button" class="atlas-close">Fechar <span>Esc</span></button>
+                    </header>
+                    <div class="atlas-scroll">
+                        <div class="atlas-intro"><div><strong id="atlasCurrent"></strong><p>Selecione um lugar para ver o caminho. Você precisa percorrê-lo andando.</p></div><button id="atlasGoal" type="button">Ver objetivo</button></div>
+                        <div class="atlas-layout">
+                            <section class="atlas-overview" aria-label="Conexões entre os lugares">
+                                <div id="atlasBoard" class="atlas-board">
+                                    <svg id="atlasLines" aria-hidden="true"></svg>
+                                    <div id="atlasNodes"></div>
+                                </div>
+                                <div class="atlas-legend"><span>● Você está aqui</span><span>◆ Investigação</span><span>— Caminhos</span><span>┄ Viagem</span></div>
+                                <p class="atlas-scale-note">Esquema dos caminhos do jogo, sem escala geográfica. Ravena é outra cidade.</p>
+                            </section>
+                            <aside class="atlas-detail" aria-labelledby="atlasLocationTitle">
+                                <span id="atlasPlaceStatus" class="atlas-eyebrow"></span>
+                                <h3 id="atlasLocationTitle"></h3>
+                                <ol id="atlasSteps" class="atlas-steps"></ol>
+                                <button id="atlasMark" class="atlas-primary" type="button">Marcar este caminho</button>
+                                <div class="atlas-observe"><span class="atlas-eyebrow">OBSERVE E INVESTIGUE</span><h4 id="atlasQuestion"></h4><p id="atlasLearningHint"></p><button id="atlasBook" type="button">Consultar meus livros</button></div>
+                            </aside>
+                        </div>
+                        <section class="atlas-local" aria-labelledby="atlasLocalTitle">
+                            <div class="atlas-local-heading"><h3 id="atlasLocalTitle"></h3><p id="atlasPosition"></p></div>
+                            <div id="atlasRail" class="atlas-rail" role="img" aria-label="Posição de Renato, portas numeradas e próxima passagem no trecho atual"></div>
+                            <ul id="atlasExits" class="atlas-exits"></ul>
+                        </section>
+                        <section class="atlas-notes">
+                            <div><span class="atlas-eyebrow">INVESTIGAÇÃO ATUAL</span><p id="atlasObjective"></p><p id="atlasCount"></p></div>
+                            <div><span class="atlas-eyebrow">NA MOCHILA</span><p id="atlasItems"></p></div>
+                        </section>
+                        <footer class="atlas-footer"><span>← → / A D: andar · ↑ / E: entrar ou conversar<br>Mapa orienta. Livros e conversas ajudam a compreender.</span><button id="romaReset" type="button">Reiniciar fase</button></footer>
+                    </div>
+                    <div id="atlasNotice" class="atlas-notice" role="status" aria-live="polite"></div>
                 </section>
             </div>
 
@@ -84,8 +114,8 @@
             <div id="endingPanel" class="ending-panel" role="dialog" aria-modal="true" aria-labelledby="endingTitle" hidden>
                 <div class="ending-panel__card">
                     <span>MEMÓRIA 01 CONCLUÍDA</span>
-                    <h2 id="endingTitle">A história voltou ao lugar.</h2>
-                    <p>Renato recuperou a folha, consultou os dois livros e corrigiu cinco registros adulterados. O saque de 410 e a deposição de 476 voltaram a ocupar suas próprias páginas. A memória está estável; a história não foi apagada.</p>
+                    <h2 id="endingTitle">476: um fim político, não o fim de tudo.</h2>
+                    <p>Renato comparou os relatos dos moradores com seus registros originais e desfez cinco interferências. A memória alcançou a deposição de Rômulo Augústulo por Odoacro, em 476. Disputas de poder, perda de recursos e conflitos militares ajudam a explicar o desfecho — o Império do Oriente e a vida romana continuaram.</p>
                     <a href="teste-escola.html">Voltar ao Cofre</a>
                     <button id="romaKeepExploring" type="button">Continuar explorando Roma</button>
                 </div>
@@ -101,9 +131,9 @@
     </main>
 
     <noscript>Ative o JavaScript para jogar a memória de Roma.</noscript>
-    <script src="js/roma-history-data.js?v=7"></script>
-    <script src="js/roma-history.js?v=7"></script>
-    <script src="js/roma.js?v=roma-mechanics-7"></script>
+    <script src="js/roma-history-data.js?v=8"></script>
+    <script src="js/roma-history.js?v=8"></script>
+    <script src="js/roma-map.js?v=9"></script>
+    <script src="js/roma.js?v=roma-map-9"></script>
 </body>
 </html>
-

@@ -5,7 +5,7 @@ window.RomaHistory = { create(config) {
   const modal=document.createElement('section');
   modal.className='roma-study';modal.id='romaStudy';modal.hidden=true;
   modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-labelledby','romaStudyTitle');
-  modal.innerHTML='<div class="roma-study__desk"><header class="roma-study__header"><div><small id="romaStudyEyebrow">LIVROS DE RENATO · TEMPO PAUSADO</small><h2 id="romaStudyTitle">Biblioteca de campo</h2></div><button id="romaStudyClose" type="button">Fechar · Esc</button></header><div id="romaStudyBody" class="roma-study__body"></div><footer class="roma-study__footer"><span id="romaStudyProgress"></span><span>Leia, compare e restaure.</span></footer></div>';
+  modal.innerHTML='<div class="roma-study__desk"><header class="roma-study__header"><div><small id="romaStudyEyebrow">REGISTROS ORIGINAIS · TEMPO PAUSADO</small><h2 id="romaStudyTitle">Biblioteca de campo</h2></div><button id="romaStudyClose" type="button">Fechar · Esc</button></header><div id="romaStudyBody" class="roma-study__body"></div><footer class="roma-study__footer"><span id="romaStudyProgress"></span><span>Ouça, leia e investigue.</span></footer></div>';
   shell.append(modal);
   const body=modal.querySelector('#romaStudyBody'),title=modal.querySelector('h2'),progress=modal.querySelector('#romaStudyProgress');
   let question=null,onCorrect=null,mode='book',pageIndex=0,returnFocus=null,inertNodes=[],answered=false;
@@ -24,7 +24,7 @@ window.RomaHistory = { create(config) {
     shell.classList.remove('has-modal');question=null;onCorrect=null;answered=false;
     config.onResume();if(returnFocus?.isConnected&&!returnFocus.inert)returnFocus.focus({preventScroll:true});
   }
-  function updateProgress(){progress.textContent=config.getState().answers.length+' / '+data.questions.length+' registros restaurados';}
+  function updateProgress(){progress.textContent=config.getState().answers.length+' / '+data.questions.length+' interferências desfeitas';}
   function renderBook(){
     mode='book';body.replaceChildren();body.className='roma-study__body is-book';
     title.textContent='Livros de Renato';updateProgress();
@@ -44,7 +44,7 @@ window.RomaHistory = { create(config) {
     if(question){
       const ready=config.getState().noted.includes(question.chapterId);
       const back=button('Voltar à comparação',()=>{renderQuestion();focusHeading();});back.id='romaReturnQuestion';article.append(back);
-      article.append(el('p',ready?'A página necessária está anotada. Compare com o registro alterado.':'Encontre a página que ajuda a conferir a data e o acontecimento do registro.','roma-study__hint'));
+      article.append(el('p',ready?'A página necessária está anotada. Compare com a pista encontrada no mundo.':'Encontre a página que ajuda a conferir a data e o acontecimento do registro.','roma-study__hint'));
     }
     const sources=el('details','','roma-study__sources');sources.append(el('summary','Fontes deste capítulo'));
     c.sources.forEach(source=>{const a=el('a',source.title);a.href=source.url;a.target='_blank';a.rel='noopener noreferrer';sources.append(a);});
@@ -53,12 +53,19 @@ window.RomaHistory = { create(config) {
     const prev=button('← Página anterior',()=>{pageIndex--;renderBook();focusHeading();});prev.disabled=pageIndex===0;
     const next=button('Próxima página →',()=>{pageIndex++;renderBook();focusHeading();});next.disabled=pageIndex===data.chapters.length-1;
     pages.append(prev,el('span',(pageIndex+1)+' / '+data.chapters.length),next);article.append(pages);
+    const journal=el('details','','roma-study__journal');
+    journal.id='romaJournal';journal.append(el('summary','Caderno de conversas · '+(config.getState().testimonies||[]).length+' anotações'));
+    journal.append(el('p','Depoimentos ficcionais dos moradores, anotados por Renato. São pistas do que eles vivem, não fontes históricas nem substitutos dos registros originais.'));
+    const notes=config.getState().testimonies||[];
+    if(!notes.length)journal.append(el('p','Converse com os moradores para registrar seus relatos aqui.'));
+    notes.forEach(t=>{const entry=el('section','','roma-study__testimony');entry.append(el('h4',t.name+' · '+t.epoch+' d.C.'),el('p',t.text));journal.append(entry);});
+    article.append(journal);
     body.append(nav,article);body.scrollTop=0;
   }
   function renderQuestion(){
     mode='question';body.replaceChildren();body.className='roma-study__body is-question';answered=false;
     title.textContent=question.title;modal.dataset.question=question.id;updateProgress();
-    const evidence=el('section','','roma-study__record');evidence.append(el('small','REGISTRO ALTERADO'),el('blockquote',question.claim));
+    const evidence=el('section','','roma-study__record');evidence.append(el('small','PISTA NA MEMÓRIA · ANOTAÇÃO DE RENATO'),el('blockquote',question.claim));
     const consult=button('Consultar meus livros',()=>{renderBook();focusHeading();},'roma-study__primary');consult.id='romaConsultBook';
     evidence.append(consult);
     const ready=config.getState().noted.includes(question.chapterId);
@@ -72,12 +79,12 @@ window.RomaHistory = { create(config) {
         if(answered||!config.getState().noted.includes(question.chapterId))return;
         if(id!==question.correct){
           b.setAttribute('aria-pressed','true');b.classList.add('is-wrong');
-          feedback.textContent='Essa opção ainda não combina com a evidência. Reabra os livros e compare '+c.date+' com o registro. Você pode tentar novamente.';
+          feedback.textContent='Essa opção ainda não combina com a evidência. Reabra os livros e compare '+c.date+' com a pista. Você pode tentar novamente.';
           config.onMistake?.(question.id);return;
         }
         answered=true;buttons.forEach(n=>n.disabled=true);b.classList.add('is-correct');b.setAttribute('aria-pressed','true');
         feedback.textContent=question.explanation;
-        const finish=button('Restaurar registro e continuar',()=>{const cb=onCorrect;close();cb?.();},'roma-study__primary');
+        const finish=button(question.actionLabel||'Desfazer interferência e continuar',()=>{const cb=onCorrect;close();cb?.();},'roma-study__primary');
         finish.id='romaRestoreRecord';choices.append(finish);finish.focus({preventScroll:false});
       });
       b.dataset.answer=id;b.disabled=!ready;b.setAttribute('aria-pressed','false');buttons.push(b);choices.append(b);
