@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Testar o verificador
-        run: node --test scripts/check-project.test.cjs
+      - name: Testar o verificador e o conteúdo educativo
+        run: node --test scripts/check-project.test.cjs scripts/check-learning.test.cjs
       - name: Conferir sintaxe e referências locais
         run: node scripts/check-project.cjs

@@ -1,0 +1,98 @@
+/* Guided investigation keeps the field-notebook materials and leaves the world unobstructed. */
+.roma-study {
+    --study-paper: #e6d7ac;
+    --study-ink: #28312d;
+    --study-leather: #343d35;
+    --study-evidence: #244f46;
+    --study-rule: #927947;
+    --study-inset: #d7c79c;
+    font-family: system-ui, sans-serif;
+}
+.roma-study__body {font-size: 16px; line-height: 1.5;}
+.roma-study__header > div {min-width: 0; flex: 1;}
+.roma-study__header > button {flex-shrink: 0;}
+.roma-study button {font-family: inherit;}
+.roma-study__footer.has-action {justify-content: flex-end; padding: 10px 16px;}
+.roma-study__footer.has-action > span {display: none;}
+.roma-study__footer.has-action > button {max-width: 100%; font-size: 15px;}
+.roma-study__body.is-book {grid-template-columns: minmax(0, 1fr) 255px;}
+.roma-study__body.is-guide, .roma-study__body.is-review, .roma-study__body.is-practice {display: block;}
+.roma-study__body.is-question {gap: 24px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);}
+.roma-study__steps {
+    grid-column: 1 / -1; display: flex; flex-wrap: wrap; list-style: none; margin: 0;
+    padding: 12px 24px; gap: 8px 20px; border-bottom: 2px solid var(--study-rule); background: var(--study-inset);
+    font-size: 14px; font-weight: 650;
+}
+.roma-study__steps li {padding: 4px 0;}
+.roma-study__steps [aria-current='step'] {border-bottom: 3px solid var(--study-evidence);}
+.roma-study__steps .is-done::after {content: ' ✓';}
+.roma-study__page {min-width: 0; padding: 24px;}
+.roma-study__page p {font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.6;}
+.roma-study__page > h3:not(:first-child) {margin-top: 16px;}
+.roma-study__page .roma-study__summary {font-size: 18px;}
+.roma-study__reading-goal {border-left: 3px solid var(--study-rule); padding: 8px 12px; margin: 16px 0;}
+.roma-study__page .roma-study__hint, .roma-study__hint {font-family: system-ui, sans-serif; font-size: 15px;}
+.roma-study__contents {min-width: 0; margin: 24px 16px 24px 0; background: var(--study-inset);}
+.roma-study__contents > summary {padding: 12px; font-weight: 650; cursor: pointer; min-height: 48px;}
+.roma-study__index {border: 0; padding: 4px 12px 16px; background: transparent;}
+.roma-study__index h3 {font-size: 14px;}
+.roma-study__index button {font-size: 14px;}
+.roma-study__details {border-top: 1px solid var(--study-rule); margin-top: 12px;}
+.roma-study__details summary {padding: 12px 0; cursor: pointer; min-height: 48px; font-size: 15px; font-weight: 650;}
+.roma-study__details p {font-size: 16px; line-height: 1.6;}
+.roma-study__details dt {font-weight: 700; margin-top: 12px;}
+.roma-study__details dd {margin: 4px 0 12px;}
+.roma-study__tools {display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--study-rule);}
+.roma-study__record {transform: none; padding: 20px; background: var(--study-inset); border-color: var(--study-rule);}
+.roma-study__record small {color: #68382b; line-height: 1.5;}
+.roma-study__record blockquote {font-size: 18px; line-height: 1.5; margin: 12px 0 20px;}
+.roma-study__record h3 {font-size: 20px; margin: 24px 0 8px;}
+.roma-study__record .roma-study__evidence {font-family: system-ui, sans-serif; font-size: 16px; background: var(--study-paper);}
+.roma-study__choices button {font-size: 16px; font-weight: 550;}
+.roma-study__choices button:disabled {opacity: .72;}
+.roma-study__choices button.is-correct {opacity: 1;}
+.roma-study__choices button.is-wrong[aria-pressed='true'] {background: #e4c4aa; border-color: #923f34; color: #28312d;}
+.roma-study__choices button.is-wrong::after {content: ' · Rever esta resposta'; font-weight: 700;}
+.roma-study__feedback:empty {display: none;}
+.roma-study__feedback:not(:empty) {padding: 16px; border-left: 4px solid var(--study-evidence); background: var(--study-inset);}
+.roma-study__feedback p {font-size: 16px; line-height: 1.6; margin: 8px 0;}
+.roma-study__feedback h3 {font-size: 20px;}
+.roma-study__feedback:focus, .roma-study h2:focus {outline: 2px solid var(--study-evidence); outline-offset: 3px;}
+.roma-study h2:focus {outline-color: #f4e6bb;}
+.roma-study__discoveries {padding: 0 0 0 28px;}
+.roma-study__discoveries li {padding: 8px 0 24px 8px; border-bottom: 1px solid var(--study-rule); margin-bottom: 16px;}
+.roma-study__discoveries li::marker {font-family: Georgia, serif; font-size: 22px; font-weight: 700;}
+.roma-study__discoveries h3 {margin-bottom: 8px;}
+.roma-study__body.is-guide > .roma-study__page,
+.roma-study__body.is-review > .roma-study__page,
+.roma-study__body.is-practice > .roma-study__page {max-width: 780px; margin: 0 auto;}
+.roma-study button, .roma-study summary {touch-action: manipulation;}
+#romaGuide {min-height: 44px; padding: 8px 12px; margin: 0 16px 12px; cursor: pointer; border: 1px solid var(--atlas-bronze); background: var(--atlas-paper); color: var(--atlas-ink); font: 600 14px/1.4 system-ui, sans-serif;}
+#romaGuide:focus-visible {outline: 3px solid #f4da91; outline-offset: 3px;}
+#romaReviewEnd {display: block; min-height: 48px; margin: 16px auto; padding: 12px 18px; cursor: pointer; font: 600 16px/1.4 system-ui, sans-serif; background: #e6d7ac; color: #28312d; border: 2px solid #927947;}
+#romaReviewEnd:focus-visible {outline: 3px solid #f4da91; outline-offset: 3px;}
+@media (max-width: 620px) {
+    #romaQuest .roma-quest-detail {position: absolute; top: 56px; left: 0; right: 0; background: #172922f5; border-left: 2px solid var(--atlas-bronze);}
+    #romaQuest #romaObjective {position: static; border: 0; background: transparent;}
+    #romaGuide {margin: 0 12px 12px;}
+}
+@media (max-width: 700px) {
+    .roma-study__body.is-book, .roma-study__body.is-question {display: block;}
+    .roma-study__steps {padding: 12px 16px; gap: 4px 16px; font-size: 13px;}
+    .roma-study__body.is-question {padding: 0;}
+    .roma-study__record, .roma-study__choices {margin: 16px;}
+    .roma-study__page {padding: 20px 16px;}
+    .roma-study__contents {margin: 8px 16px 24px;}
+    .roma-study__record {padding: 16px;}
+    .roma-study__body.is-practice .roma-study__choices {margin: 16px 0;}
+    .roma-study__page .roma-study__summary {font-size: 17px;}
+    .roma-study__tools {display: grid; grid-template-columns: 1fr;}
+    .roma-study__page > button {max-width: 100%;}
+    .roma-study__header h2 {font-size: 20px; overflow-wrap: anywhere;}
+    .roma-study__header small {font-size: 10px;}
+}
+@media (max-height: 500px) and (min-width: 701px) {
+    .roma-study__body.is-book {grid-template-columns: minmax(0, 1fr) 210px;}
+    .roma-study__body.is-question {padding: 16px; gap: 16px;}
+    .roma-study__steps {padding: 8px 16px;}
+}

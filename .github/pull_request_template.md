@@ -4,11 +4,12 @@ Descreva o problema e a solução, indicando a parte do jogo afetada.
 
 ## Como foi testado?
 
-- [ ] Executei `node --test scripts/check-project.test.cjs`.
+- [ ] Executei `node --test scripts/check-project.test.cjs scripts/check-learning.test.cjs`.
 - [ ] Executei `node scripts/check-project.cjs`.
 - [ ] Testei no navegador o trecho afetado e suas entradas/saídas.
 - [ ] Conferi o celular, se a mudança afeta interface ou controles.
 - [ ] Atualizei as referências, se a mudança afeta conteúdo histórico.
+- [ ] Atualizei os guias e o histórico de mudanças, quando necessário.
 
 ## Capturas e limitações
 

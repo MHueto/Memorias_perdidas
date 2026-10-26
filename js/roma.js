@@ -58,7 +58,7 @@
 
     const briefing = [
         {speaker:'PEDRO NEVES',text:'Renato, você chegou a Roma em 475 d.C. A memória deveria avançar até a deposição de Rômulo Augústulo em 476, mas está presa: alguma interferência impede esse desfecho.'},
-        {speaker:'PEDRO NEVES',text:'Seus dois livros contêm os registros originais. Não os altere. Ouça os moradores, examine documentos e compare as pistas para descobrir o que bloqueia os acontecimentos.'},
+        {speaker:'PEDRO NEVES',text:'Seus livros contêm os registros originais. Converse com os moradores e compare as pistas. A Ajuda da missão indica onde procurar; cada comparação abre o trecho certo do livro. Leia, anote e escolha o que combina com a história.'},
         {speaker:'PEDRO NEVES',text:'Os moradores não sabem nada sobre o Cofre. Para eles, esta é a vida cotidiana. Só você pode comparar o que vê com a história registrada nos livros.'},
         {speaker:'PEDRO NEVES',text:'A folha perdida no Coliseu é a primeira pista. O desafio dos leões é ficcional, assim como nossa viagem. As rachaduras que surgirem mostram a memória se desfazendo, não Roma inteira sendo destruída em 476.'},
         {speaker:'RENATO',text:'Vou recuperar a folha sem entrar na arena e descobrir por que essa memória não chega ao fim.'}
@@ -76,10 +76,10 @@
         { speaker: 'RENATO', text: 'É exatamente o que preciso para alcançar a memória sem entrar na areia.' }
     ];
     const storyObjectives = {
-        senate:'Fale com Lúcio no Senado e compare o salvo-conduto com o livro de 475.',
-        supplyInquiry:'Ouça a mercadora no mercado e investigue as contas do armazém.',
+        senate:'Entre no Senado pelo Foro e fale com Lúcio sobre a assinatura exigida no documento.',
+        supplyInquiry:'Volte ao mercado e fale com a mercadora: a lista de receitas não combina com as remessas.',
         militaryPetition:'Procure o mensageiro no lado esquerdo do Foro: há uma petição retida.',
-        routeInquiry:'Leve a petição a Lúcio e descubra por que as mensagens não chegam à corte.',
+        routeInquiry:'Volte a Lúcio no Senado para conferir o endereço da corte no despacho.',
         travelRavenna:'Volte ao mensageiro no Foro para viajar até Ravena.',
         aftermath:'Em Ravena, converse com Rômulo e confronte a última ordem com seus livros.',
         deposition:'Acompanhe o desfecho de 476.'
@@ -1178,6 +1178,7 @@
         craftDolls.addEventListener('click', craftStrawDolls);
         closeCraft.addEventListener('click', closeCraftPanel);
         document.querySelector('#romaKeepExploring').addEventListener('click',()=>{endingPanel.hidden=true;heldKeys.clear();setObjective('Memória concluída. Explore as ruas, a oficina e o pátio.');viewport.focus({preventScroll:true});});
+        document.querySelector('#romaReviewEnd').addEventListener('click',()=>{endingPanel.hidden=true;heldKeys.clear();historyUI.review();});
         mapButton.addEventListener('click',openMap);
         document.querySelector('#romaCloseMap').addEventListener('click',closeMap);
         document.querySelector('#atlasBook').addEventListener('click',()=>{closeMap();historyUI.open();});
@@ -1229,11 +1230,17 @@
     }
 
     historyUI=window.RomaHistory.create({
-        getState:()=>({noted:state.history.noted,answers:state.history.answers,testimonies:state.testimonies,canOpen:!dialogueOpen&&!craftOpen&&!mapOpen&&!cutscene&&!sceneLoading&&!portalEntering&&!lassoResolving&&endingPanel.hidden}),
+        getState:()=>({step:state.step,noted:state.history.noted,answers:state.history.answers,testimonies:state.testimonies,canOpen:!dialogueOpen&&!craftOpen&&!mapOpen&&!cutscene&&!sceneLoading&&!portalEntering&&!lassoResolving&&endingPanel.hidden}),
         onPause:()=>{heldKeys.clear();player.moving=false;},
         onResume:()=>{heldKeys.clear();previousTime=performance.now();},
         onNote:id=>{if(!state.history.noted.includes(id))state.history.noted.push(id);saveGame();},
-        onMistake:()=>{state.history.attempts++;saveGame();}
+        onMistake:()=>{state.history.attempts++;saveGame();},
+        onGuideRoute:()=>{
+            const target=destination();if(!target)return;
+            state.navigationTarget=target[0];saveGame();
+            propsLayer.querySelectorAll('.roma-prop--route,.roma-prop--entrance,.roma-prop--destination').forEach(node=>node.remove());
+            renderRoute();document.querySelector('#romaCompass').textContent=atlas.compass().text;
+        }
     });
     atlas=window.RomaAtlas.create({
         areas,names:areas,edges:navigationEdges,

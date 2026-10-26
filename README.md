@@ -4,7 +4,7 @@
 
 ### [Jogar no navegador →](https://mhueto.github.io/Memorias_perdidas/)
 
-[Testar diretamente a fase de Roma](https://mhueto.github.io/Memorias_perdidas/roma.html?intro=1) · [Relatar um problema](https://github.com/MHueto/Memorias_perdidas/issues/new/choose) · [Guias do projeto](docs/README.md)
+[Testar diretamente a fase de Roma](https://mhueto.github.io/Memorias_perdidas/roma.html?intro=1) · [Relatar um problema](https://github.com/MHueto/Memorias_perdidas/issues/new/choose) · [Guias do projeto](docs/README.md) · [Novidades](CHANGELOG.md)
 
 [![Verificar projeto](https://github.com/MHueto/Memorias_perdidas/actions/workflows/verify.yml/badge.svg)](https://github.com/MHueto/Memorias_perdidas/actions/workflows/verify.yml)
 
@@ -16,7 +16,7 @@
 
 Renato está indo embora da escola quando percebe que esqueceu o celular. O que parecia uma volta rápida à sala de aula o leva ao **Cofre das Memórias**, um lugar que preserva fragmentos de momentos históricos.
 
-Algumas dessas memórias foram alteradas. Na primeira missão, Renato chega a uma Roma cujo passado não segue o caminho esperado: cabe a ele conversar com moradores, explorar os ambientes e comparar as pistas com os registros originais que carrega.
+Algumas dessas memórias foram alteradas. Na missão disponível, Renato chega a uma Roma cujo passado não segue o caminho esperado: cabe a ele conversar com moradores, explorar os ambientes e comparar as pistas com os registros originais que carrega.
 
 O objetivo é **aprender história por meio da investigação**. Os livros não são reescritos pelo jogador: eles ajudam a descobrir o que foi alterado na memória e a restaurar o curso dos acontecimentos.
 
@@ -51,13 +51,16 @@ Em dispositivos de toque, os controles de movimento e interação aparecem na te
 - Viagem até o Cofre das Memórias, corredores conectados e encontro com Pedro Neves.
 - Entrada na memória de Roma, com mercado, Foro, Coliseu, oficina, bairro residencial, pátio e Senado.
 - Investigação sobre o fim do Império Romano do Ocidente, com livros, pistas, diálogos e viagem a Ravena.
+- Ajuda da missão, leitura guiada, explicações de cada resposta e revisão do que foi aprendido.
 - Mapa de orientação: mostra a posição e os caminhos, **sem teletransportar o personagem**.
 - Desafios de exploração, coleta de objetos e recuperação de uma memória na arena.
 - Efeitos visuais de deterioração da memória ao longo da partida.
 
-### Próximas memórias
+### Escopo da campanha
 
-As fases sobre **as Cruzadas** e **a Peste Negra** estão planejadas. Elas ainda **não estão disponíveis nesta demonstração**.
+O plano atual concentra o jogo em **Roma**. A fundação, a expansão e a Pax Romana são etapas planejadas; a **queda do Império Romano do Ocidente** é a etapa histórica já jogável nesta demonstração. A introdução na escola e no Cofre continua disponível.
+
+As Cruzadas e a Peste Negra pertencem ao planejamento anterior e não fazem parte do escopo atual. Os documentos de pesquisa foram preservados como referência. Veja o [escopo e o estado de cada etapa](docs/ESCOPO.md).
 
 ## História e ficção
 
@@ -70,6 +73,7 @@ Os livros de Renato apresentam referências para consulta. Veja também:
 - [Pesquisa histórica para o jogo](docs/Pesquisa_historica_para_o_jogo.md).
 - [Estrutura da investigação de Roma](docs/roma-investigacao-v8.md).
 - [Mapa e orientação na fase](docs/roma-orientacao-v9.md).
+- [Como funcionam as pistas guiadas e a aprendizagem](docs/roma-aprendizagem-v10.md).
 
 Esses documentos fazem parte do desenvolvimento e podem conter spoilers ou ideias de versões anteriores.
 
@@ -100,7 +104,7 @@ O jogo usa **HTML, CSS e JavaScript**, sem etapa de compilação.
 Memorias_perdidas/
 ├── index.html             Menu principal
 ├── teste-escola.html      Escola, cofre e introdução
-├── roma.html              Primeira memória histórica
+├── roma.html              Memória da queda de Roma
 ├── css/                   Estilos e interface
 ├── js/                    Movimento, diálogos, investigação e mapa
 ├── assets/                Cenários, sprites e outros recursos
@@ -108,6 +112,7 @@ Memorias_perdidas/
 ├── scripts/               Verificação de arquivos e testes do verificador
 ├── .github/               Formulários de problemas e verificação automática
 ├── CONTRIBUTING.md        Orientações para contribuir
+├── CHANGELOG.md           Histórico das atualizações
 └── .nojekyll              Publicação estática pelo GitHub Pages
 ```
 
@@ -117,6 +122,7 @@ Com Node.js 24 instalado, é possível conferir o projeto sem instalar pacotes:
 
 ```bash
 node --test scripts/check-project.test.cjs
+node --test scripts/check-learning.test.cjs
 node scripts/check-project.cjs
 ```
 
@@ -126,7 +132,7 @@ A verificação confere sintaxe e referências locais, incluindo diferenças de 
 
 A demonstração usa **GitHub Pages**, configurado para publicar a raiz da branch `master`. Depois que uma alteração é enviada para essa branch, o GitHub prepara uma nova publicação; o link do jogo permanece o mesmo.
 
-Consulte [Settings → Pages](https://github.com/MHueto/Memorias_perdidas/settings/pages) para verificar a configuração e [Actions](https://github.com/MHueto/Memorias_perdidas/actions) para acompanhar a publicação. Esses ajustes exigem permissão no repositório.
+Consulte [Settings → Pages](https://github.com/MHueto/Memorias_perdidas/settings/pages) para verificar a configuração e [Actions](https://github.com/MHueto/Memorias_perdidas/actions) para acompanhar a publicação. Esses ajustes exigem permissão no repositório. O [checklist de publicação](docs/PUBLICACAO.md) explica como conferir uma atualização sem apagar o progresso de teste.
 
 ## Encontrou um problema?
 

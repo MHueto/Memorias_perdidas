@@ -24,6 +24,7 @@ Não é necessário executar `npm install`. HTML, CSS e JavaScript são servidos
 | Escola, cofre, diálogos iniciais e viagem | [teste-escola.html](../teste-escola.html), [js/teste-escola.js](../js/teste-escola.js), [css/teste-escola.css](../css/teste-escola.css) |
 | Áreas, personagens, movimento e desafios de Roma | [js/roma.js](../js/roma.js), [roma.html](../roma.html), [css/roma.css](../css/roma.css) |
 | Conteúdo histórico, perguntas e fontes | [js/roma-history-data.js](../js/roma-history-data.js) |
+| Resumos, dicas, glossário e revisão educativa | [js/roma-learning.js](../js/roma-learning.js), [css/roma-learning.css](../css/roma-learning.css) |
 | Consulta dos livros e comparação das pistas | [js/roma-history.js](../js/roma-history.js), [css/roma-mechanics.css](../css/roma-mechanics.css) |
 | Mapa, rotas e interface compacta | [js/roma-map.js](../js/roma-map.js), [css/roma-interface.css](../css/roma-interface.css) |
 | Imagens, animações e cenários | [assets/images](../assets/images/) |
@@ -54,6 +55,7 @@ Com Node.js 24 instalado, na raiz do repositório:
 
 ```bash
 node --test scripts/check-project.test.cjs
+node --test scripts/check-learning.test.cjs
 node scripts/check-project.cjs
 ```
 
@@ -84,6 +86,8 @@ Use uma janela privativa ou um perfil separado para não apagar seu progresso pe
 ## Publicação
 
 A demonstração já usa a raiz da branch `master` no GitHub Pages. Confira as alterações, execute as verificações e só então envie o commit. Não é necessário criar outro site ou trocar a configuração de hospedagem.
+
+Siga o [checklist de publicação](PUBLICACAO.md) e registre alterações visíveis no [histórico de mudanças](../CHANGELOG.md). Funcionalidades planejadas ficam no [escopo da campanha](ESCOPO.md), separadas das já jogáveis.
 
 Após o envio, confira [Actions](https://github.com/MHueto/Memorias_perdidas/actions) e [Settings → Pages](https://github.com/MHueto/Memorias_perdidas/settings/pages). Teste também [a versão pública](https://mhueto.github.io/Memorias_perdidas/) depois da conclusão da publicação. O navegador pode manter recursos em cache; recarregue a página se ainda vir a versão anterior.
 

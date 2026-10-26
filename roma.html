@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/roma.css?v=roma-story-8">
     <link rel="stylesheet" href="css/roma-mechanics.css?v=8">
     <link rel="stylesheet" href="css/roma-interface.css?v=9">
+    <link rel="stylesheet" href="css/roma-learning.css?v=10">
 </head>
 <body class="roma-page">
     <main class="roma-game" aria-label="Memórias Perdidas: Queda de Roma">
@@ -31,8 +32,11 @@
                 <a class="roma-hud__back" href="teste-escola.html">&larr; Cofre</a>
                 <details id="romaQuest" class="roma-hud__objective" open>
                     <summary>Investigação <span id="romaQuestCount">0/5</span></summary>
-                    <span id="romaChapter">MEMÓRIA 01 · 475–476 d.C.</span>
-                    <strong id="romaObjective">Aguarde as instruções de Pedro.</strong>
+                    <div class="roma-quest-detail">
+                        <span id="romaChapter">MEMÓRIA 01 · 475–476 d.C.</span>
+                        <strong id="romaObjective">Aguarde as instruções de Pedro.</strong>
+                        <button id="romaGuide" type="button">Ajuda da missão</button>
+                    </div>
                 </details>
                 <button id="romaMap" class="roma-hud__reset" type="button" aria-label="Abrir mapa de orientação, sem teletransporte">Mapa · M</button>
                 <button id="romaBook" class="roma-hud__reset" type="button" aria-label="Consultar os livros de Renato">Livros · B</button>
@@ -116,6 +120,7 @@
                     <span>MEMÓRIA 01 CONCLUÍDA</span>
                     <h2 id="endingTitle">476: um fim político, não o fim de tudo.</h2>
                     <p>Renato comparou os relatos dos moradores com seus registros originais e desfez cinco interferências. A memória alcançou a deposição de Rômulo Augústulo por Odoacro, em 476. Disputas de poder, perda de recursos e conflitos militares ajudam a explicar o desfecho — o Império do Oriente e a vida romana continuaram.</p>
+                    <button id="romaReviewEnd" type="button">Rever o que aprendi</button>
                     <a href="teste-escola.html">Voltar ao Cofre</a>
                     <button id="romaKeepExploring" type="button">Continuar explorando Roma</button>
                 </div>
@@ -132,8 +137,9 @@
 
     <noscript>Ative o JavaScript para jogar a memória de Roma.</noscript>
     <script src="js/roma-history-data.js?v=8"></script>
-    <script src="js/roma-history.js?v=8"></script>
+    <script src="js/roma-learning.js?v=10"></script>
+    <script src="js/roma-history.js?v=10"></script>
     <script src="js/roma-map.js?v=9"></script>
-    <script src="js/roma.js?v=roma-map-9"></script>
+    <script src="js/roma.js?v=roma-learning-10"></script>
 </body>
 </html>

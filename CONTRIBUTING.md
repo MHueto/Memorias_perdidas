@@ -12,9 +12,11 @@ Para correções históricas, inclua a fonte e explique qual trecho do jogo prec
 
 1. Faça uma alteração de escopo pequeno e preserve os trabalhos existentes.
 2. Não renomeie nem remova artes sem revisar todas as referências. Mantenha a estética pixel art e a legibilidade no celular.
-3. Execute `node --test scripts/check-project.test.cjs` e `node scripts/check-project.cjs` com Node.js 24.
+3. Execute `node --test scripts/check-project.test.cjs scripts/check-learning.test.cjs` e `node scripts/check-project.cjs` com Node.js 24.
 4. Teste o trecho afetado no navegador, inclusive entradas, saídas e controles de toque quando aplicável.
 5. Descreva no commit ou pull request o que mudou, como foi testado e qualquer limitação conhecida.
+
+Confira o [escopo atual](docs/ESCOPO.md) antes de ampliar a campanha. Registre mudanças visíveis em [CHANGELOG.md](CHANGELOG.md) e use o [checklist de publicação](docs/PUBLICACAO.md) ao atualizar a demonstração.
 
 O jogo não precisa de compilação nem de dependências npm. Não envie `node_modules`, senhas, credenciais, configurações pessoais ou relatórios temporários.
 
