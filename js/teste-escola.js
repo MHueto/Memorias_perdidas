@@ -133,7 +133,7 @@
 
     // Folha 2 × 8: oito poses para cada direção deixam o passo contínuo.
     const RENATO_SPRITE_SHEET = 'assets/images/renato/renato-walk-spritesheet-v4.png';
-    const ROME_ENTRY_IMAGE = 'assets/images/roma/entrada-roma-pixelart-v1.png';
+    const ROME_ENTRY_IMAGE = 'assets/images/roma/fundacao-v1.png';
     const SCENE_IMAGE_PATHS = [
         'assets/images/escola/lado_de_fora_escola.png',
         'assets/images/escola/escola_por_dentro_completa.png',
@@ -239,7 +239,8 @@
         { speaker: 'PEDRO NEVES', text: 'A invasão alterou alguns fragmentos. Quando uma memória muda, o passado começa a se desfazer.' },
         { speaker: 'RENATO', text: 'E o que eu tenho que fazer?' },
         { speaker: 'PEDRO NEVES', text: 'Você vai entrar nas memórias instáveis, encontrar o ponto alterado e restaurá-lo sem mudar o resto da história.' },
-        { speaker: 'PEDRO NEVES', text: 'A primeira ruptura está na queda de Roma. Quando estiver pronto, use o núcleo para atravessar.' },
+        { speaker: 'PEDRO NEVES', text: 'Vamos investigar quatro momentos de Roma: sua fundação, a expansão, a Pax Romana e a queda do governo ocidental. O núcleo abre a linha do tempo; começamos pelas origens.' },
+        { speaker: 'PEDRO NEVES', text: 'Seus livros guardam os registros originais. Observe as pistas e compare antes de agir. As memórias são recortes: há muitos séculos entre elas, e alguns processos se sobrepõem.' },
         { speaker: 'RENATO', text: 'Entendi. Vou consertar isso.' }
     ];
     let storyDialogueOpen = false;
@@ -396,7 +397,7 @@
         });
 
         Promise.all([preloadSceneImage(ROME_ENTRY_IMAGE), minimumTransition]).finally(() => {
-            window.location.assign('roma.html?intro=1');
+            window.location.assign('campanha-roma.html');
         });
     }
 

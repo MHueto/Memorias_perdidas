@@ -9,11 +9,13 @@
 - [Escopo da campanha](ESCOPO.md): o que está jogável e o que ainda está planejado.
 - [Publicar e conferir uma atualização](PUBLICACAO.md): checklist do GitHub Pages e cuidados com os saves.
 - [Novidades](../CHANGELOG.md): histórico das atualizações do repositório.
+- [Campanha de Roma — v11](campanha-roma-v11.md): quatro etapas, desbloqueios, desafios, fontes e arquivos.
+- [Artes da campanha — v11](artes-campanha-roma-v11.md): arquivos dos três novos cenários, direção visual e prompts finais.
 - [Pesquisa histórica](Pesquisa_historica_para_o_jogo.md): referências e material de estudo. Contém ideias de desenvolvimento, não apenas conteúdo já implementado.
 
 ## Funcionamento atual de Roma
 
-Leia estes documentos junto com o código atual. Os sufixos `v8`, `v9` e `v10` indicam a etapa em que cada guia foi escrito, não versões diferentes para instalar.
+Leia estes documentos junto com o código atual. Os sufixos `v8` a `v11` indicam etapas de desenvolvimento, não pacotes diferentes para instalar. A v11 conecta as quatro memórias; v8–v10 detalham a fase da queda.
 
 - [Investigação histórica — v8](roma-investigacao-v8.md): registros originais, pistas e comparações sobre 475–476 d.C.
 - [Mapa e orientação — v9](roma-orientacao-v9.md): rotas, localização, controles e consulta aos livros.

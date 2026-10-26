@@ -18,7 +18,11 @@ const defaultSaves = {
     lastSlot: null
 };
 
-let gameSaves = JSON.parse(localStorage.getItem('gameSaves')) || { ...defaultSaves };
+let gameSaves = { ...defaultSaves };
+try {
+    const saved = JSON.parse(localStorage.getItem('gameSaves'));
+    if (saved && typeof saved === 'object' && !Array.isArray(saved)) gameSaves = { ...defaultSaves, ...saved };
+} catch { /* Um save inválido não deve impedir o acesso ao menu da campanha. */ }
 
 function saveGameData(slot, data) {
     gameSaves[slot] = data;
@@ -33,6 +37,11 @@ btnJogar.addEventListener('click', () => {
 
 // Botão Continuar
 btnContinuar.addEventListener('click', () => {
+    const campaign = window.RomaCampaign.snapshot();
+    if (campaign.completed.length || Object.values(campaign.eras).some(era => era.started)) {
+        window.location.href = 'campanha-roma.html';
+        return;
+    }
     const ultimoSlot = gameSaves.lastSlot;
     if (ultimoSlot && gameSaves[ultimoSlot]) {
         window.location.href = 'teste-escola.html';
@@ -44,6 +53,10 @@ btnContinuar.addEventListener('click', () => {
 });
 
 // Botão Novo Jogo
+document.querySelector('#btn-campanha-roma').addEventListener('click', () => {
+    window.location.href = 'campanha-roma.html';
+});
+
 btnNovoJogo.addEventListener('click', () => {
     modalJogar.classList.remove('ativo');
     modalSlots.classList.add('ativo');

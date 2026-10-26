@@ -14,7 +14,7 @@ Não é necessário compilar, instalar pacotes ou contratar outro serviço. Este
 4. Com Node.js 24, execute na raiz do projeto:
 
    ```bash
-   node --test scripts/check-project.test.cjs scripts/check-learning.test.cjs
+   node --test scripts/check-project.test.cjs scripts/check-learning.test.cjs scripts/check-campaign.test.cjs
    node scripts/check-project.cjs
    git diff --check
    ```
@@ -26,7 +26,7 @@ Não é necessário compilar, instalar pacotes ou contratar outro serviço. Este
 
 1. Abra [Actions](https://github.com/MHueto/Memorias_perdidas/actions). Confira tanto **Verificar projeto** quanto a publicação do **Pages** para o commit enviado.
 2. Aguarde a publicação terminar e abra o [site público](https://mhueto.github.io/Memorias_perdidas/). O teste local não confirma que o site já atualizou.
-3. Teste menu → novo jogo → escola e o [atalho para Roma](https://mhueto.github.io/Memorias_perdidas/roma.html?intro=1). Confira o cenário, movimento, mapa, livros e ajuda da missão.
+3. Teste menu → novo jogo → escola, **Jogar → Memórias de Roma** e o [atalho da queda](https://mhueto.github.io/Memorias_perdidas/roma.html?intro=1). Confira os cenários, movimento, livros, roteiro e transições. Em uma partida nova, apenas a fundação deve estar liberada na linha do tempo.
 4. Se o navegador mostrar conteúdo antigo, recarregue ignorando o cache ou teste em janela privativa. **Não limpe os dados do site sem necessidade:** isso pode apagar o progresso.
 
 O progresso fica no navegador. Uma janela privativa permite testar um jogo novo sem apagar o save normal; ela não compartilha esse progresso com outras janelas ou aparelhos.

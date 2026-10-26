@@ -1013,6 +1013,7 @@
     }
     function finishHistory(){
         state.step='complete';state.finished=true;state.history.stage=1;state.cityState=1;state.history.epoch='476';
+        window.RomaCampaign.complete('fall');
         saveGame();setObjective('Memória estabilizada: cinco interferências desfeitas. Releia os livros e as conversas.');
         renderScene();endingPanel.hidden=false;endingPanel.querySelector('a').focus();
     }
@@ -1205,7 +1206,7 @@
         try {await preloadScene(state.area);} catch {showToast('O cenário não carregou. Recarregue para tentar novamente.',8000);}
         sceneLoading=false;transition.hidden=true;
         Object.keys(areas).forEach(key=>preloadScene(key).catch(()=>{}));
-        chapter.textContent = 'MEMÓRIA 01 — OCIDENTE · 475–476 d.C.';
+        chapter.textContent = 'MEMÓRIA IV — OCIDENTE · 475–476 d.C.';
         if (state.finished) { state.cityState = 1; setObjective('Memória de Roma concluída.'); endingPanel.hidden = false; }
         else if (state.step === 'briefing') {
             setObjective('Aguarde as instruções de Pedro.');

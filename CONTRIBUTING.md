@@ -12,7 +12,7 @@ Para correções históricas, inclua a fonte e explique qual trecho do jogo prec
 
 1. Faça uma alteração de escopo pequeno e preserve os trabalhos existentes.
 2. Não renomeie nem remova artes sem revisar todas as referências. Mantenha a estética pixel art e a legibilidade no celular.
-3. Execute `node --test scripts/check-project.test.cjs scripts/check-learning.test.cjs` e `node scripts/check-project.cjs` com Node.js 24.
+3. Execute `node --test scripts/check-project.test.cjs scripts/check-learning.test.cjs scripts/check-campaign.test.cjs` e `node scripts/check-project.cjs` com Node.js 24.
 4. Teste o trecho afetado no navegador, inclusive entradas, saídas e controles de toque quando aplicável.
 5. Descreva no commit ou pull request o que mudou, como foi testado e qualquer limitação conhecida.
 
@@ -24,6 +24,7 @@ O jogo não precisa de compilação nem de dependências npm. Não envie `node_m
 
 - Renato compara pistas com registros originais; os livros não são reescritos pelo jogador.
 - A fase investiga 475–476 d.C. e o fim convencional do Império Romano do Ocidente, sem tratar 476 como o desaparecimento de toda a vida romana ou do Império do Oriente.
+- Nas origens, diferencie tradição lendária de evidência arqueológica. Na expansão, distinga domínio territorial de regime imperial; na Pax Romana, não confunda estabilidade relativa com paz universal ou igualdade de direitos.
 - Moradores romanos não conhecem o Cofre ou as interferências na memória.
 - Obstáculos ficcionais e deterioração visual da memória não devem ser apresentados como acontecimentos históricos documentados.
 - Preserve as referências e acrescente fontes verificáveis ao alterar conteúdo histórico.

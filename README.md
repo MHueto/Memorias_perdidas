@@ -4,11 +4,11 @@
 
 ### [Jogar no navegador →](https://mhueto.github.io/Memorias_perdidas/)
 
-[Testar diretamente a fase de Roma](https://mhueto.github.io/Memorias_perdidas/roma.html?intro=1) · [Relatar um problema](https://github.com/MHueto/Memorias_perdidas/issues/new/choose) · [Guias do projeto](docs/README.md) · [Novidades](CHANGELOG.md)
+[Abrir a campanha de Roma](https://mhueto.github.io/Memorias_perdidas/campanha-roma.html) · [Testar a queda](https://mhueto.github.io/Memorias_perdidas/roma.html?intro=1) · [Relatar um problema](https://github.com/MHueto/Memorias_perdidas/issues/new/choose) · [Guias do projeto](docs/README.md) · [Novidades](CHANGELOG.md)
 
 [![Verificar projeto](https://github.com/MHueto/Memorias_perdidas/actions/workflows/verify.yml/badge.svg)](https://github.com/MHueto/Memorias_perdidas/actions/workflows/verify.yml)
 
-> **Protótipo em desenvolvimento.** A versão disponível reúne a introdução na escola, o Cofre das Memórias e a primeira fase histórica, ambientada em 475–476 d.C. É possível jogar sem instalar o projeto ou criar uma conta.
+> **Protótipo em desenvolvimento.** Esta revisão reúne a escola, o Cofre e quatro etapas jogáveis de Roma: fundação, expansão, Pax Romana e queda do governo ocidental. Jogue diretamente pelo navegador, sem instalar o jogo.
 
 ![Cenário em pixel art da entrada de Roma, com muralhas, um arco e bancas de mercado ao pôr do sol.](assets/images/roma/entrada-roma-simples-v6.png)
 
@@ -16,7 +16,7 @@
 
 Renato está indo embora da escola quando percebe que esqueceu o celular. O que parecia uma volta rápida à sala de aula o leva ao **Cofre das Memórias**, um lugar que preserva fragmentos de momentos históricos.
 
-Algumas dessas memórias foram alteradas. Na missão disponível, Renato chega a uma Roma cujo passado não segue o caminho esperado: cabe a ele conversar com moradores, explorar os ambientes e comparar as pistas com os registros originais que carrega.
+Algumas dessas memórias foram alteradas. Renato percorre quatro momentos de Roma: cabe a ele conversar com moradores, explorar os ambientes e comparar as pistas com os registros originais que carrega.
 
 O objetivo é **aprender história por meio da investigação**. Os livros não são reescritos pelo jogador: eles ajudam a descobrir o que foi alterado na memória e a restaurar o curso dos acontecimentos.
 
@@ -25,11 +25,13 @@ O objetivo é **aprender história por meio da investigação**. Os livros não 
 1. Abra **[Jogar no navegador](https://mhueto.github.io/Memorias_perdidas/)**.
 2. No menu, escolha **Jogar → Novo Jogo → Jogo 1** (ou outro espaço disponível).
 3. Avance a conversa inicial e explore a escola.
-4. Se quiser experimentar apenas a parte histórica, use o **[atalho para Roma](https://mhueto.github.io/Memorias_perdidas/roma.html?intro=1)**.
+4. Para começar direto na parte histórica, abra a **[campanha de Roma](https://mhueto.github.io/Memorias_perdidas/campanha-roma.html)**.
+
+**Quatro memórias em sequência:** no menu, escolha **Jogar → Memórias de Roma**. A fundação abre primeiro; os demais períodos são liberados conforme você conclui as etapas. **Continuar** retoma a linha do tempo quando já há progresso romano. O [atalho da queda](https://mhueto.github.io/Memorias_perdidas/roma.html?intro=1) continua disponível para testar apenas essa fase.
 
 **No celular:** use os botões na tela. A orientação horizontal oferece mais espaço para enxergar os cenários. O carregamento inicial pode demorar conforme a conexão.
 
-**Progresso:** a fase de Roma salva o avanço no próprio navegador. Ele não é sincronizado entre aparelhos, entre navegadores ou com a versão em `localhost`. O atalho para Roma respeita um progresso existente; para recomeçar essa fase, abra **Mapa → Reiniciar Roma** e confirme.
+**Progresso:** a campanha salva o avanço no próprio navegador. Não há sincronização entre aparelhos, navegadores ou a versão em `localhost`. Os espaços Jogo 1/2/3 do menu não são três campanhas romanas independentes. Saves antigos da queda são preservados; para recomeçar apenas a queda, abra **Mapa → Reiniciar Roma** e confirme. Veja [como funcionam os saves](docs/campanha-roma-v11.md).
 
 ## Controles
 
@@ -39,7 +41,7 @@ O objetivo é **aprender história por meio da investigação**. Os livros não 
 | Entrar ou interagir | `W` ou `↑` | `E`, `W` ou `↑` |
 | Pular | `Espaço` | — |
 | Usar a ação do desafio | — | `Espaço`, quando solicitado |
-| Abrir o mapa | — | `M` |
+| Abrir mapa ou roteiro | — | `M` |
 | Consultar os livros | — | `B` |
 | Avançar uma conversa | Botão **Continuar** ou `Enter` | Botão **Continuar** ou `Enter` |
 
@@ -55,16 +57,17 @@ Em dispositivos de toque, os controles de movimento e interação aparecem na te
 - Mapa de orientação: mostra a posição e os caminhos, **sem teletransportar o personagem**.
 - Desafios de exploração, coleta de objetos e recuperação de uma memória na arena.
 - Efeitos visuais de deterioração da memória ao longo da partida.
+- Três novos cenários, nove investigações com consulta aos livros e desafios de construção, abastecimento e escoamento de água; progressão até a queda e encerramento das quatro memórias.
 
 ### Escopo da campanha
 
-O plano atual concentra o jogo em **Roma**. A fundação, a expansão e a Pax Romana são etapas planejadas; a **queda do Império Romano do Ocidente** é a etapa histórica já jogável nesta demonstração. A introdução na escola e no Cofre continua disponível.
+O jogo concentra-se em **Roma**, com quatro etapas conectadas pela linha do tempo. A introdução na escola e no Cofre foi preservada. Cada época tem investigação e desafios próprios.
 
 As Cruzadas e a Peste Negra pertencem ao planejamento anterior e não fazem parte do escopo atual. Os documentos de pesquisa foram preservados como referência. Veja o [escopo e o estado de cada etapa](docs/ESCOPO.md).
 
 ## História e ficção
 
-A primeira fase começa em **475 d.C.** e investiga os acontecimentos que levam à deposição de Rômulo Augústulo em **476 d.C.**, marco convencional do fim do Império Romano do Ocidente.
+A campanha distingue lenda e evidência nas origens, explora a expansão republicana em 146 a.C., visita a Pax Romana em 117 d.C. e termina em **475–476 d.C.**, com a deposição de Rômulo Augústulo, marco convencional do fim do Império Romano do Ocidente. São recortes separados por séculos; expansão e Pax Romana se sobrepõem.
 
 A viagem temporal, os personagens do presente, os obstáculos da investigação e o desafio dos leões são elementos de ficção. A deterioração visual representa uma **memória instável**: não significa que a cidade de Roma tenha sido completamente destruída em 476, nem que o Império Romano do Oriente tenha terminado nessa data.
 
@@ -74,6 +77,7 @@ Os livros de Renato apresentam referências para consulta. Veja também:
 - [Estrutura da investigação de Roma](docs/roma-investigacao-v8.md).
 - [Mapa e orientação na fase](docs/roma-orientacao-v9.md).
 - [Como funcionam as pistas guiadas e a aprendizagem](docs/roma-aprendizagem-v10.md).
+- [Campanha romana: etapas, fontes e funcionamento](docs/campanha-roma-v11.md).
 
 Esses documentos fazem parte do desenvolvimento e podem conter spoilers ou ideias de versões anteriores.
 
@@ -105,6 +109,8 @@ Memorias_perdidas/
 ├── index.html             Menu principal
 ├── teste-escola.html      Escola, cofre e introdução
 ├── roma.html              Memória da queda de Roma
+├── campanha-roma.html     Linha do tempo das quatro memórias
+├── roma-jornadas.html     Fundação, expansão e Pax Romana
 ├── css/                   Estilos e interface
 ├── js/                    Movimento, diálogos, investigação e mapa
 ├── assets/                Cenários, sprites e outros recursos
@@ -123,6 +129,7 @@ Com Node.js 24 instalado, é possível conferir o projeto sem instalar pacotes:
 ```bash
 node --test scripts/check-project.test.cjs
 node --test scripts/check-learning.test.cjs
+node --test scripts/check-campaign.test.cjs
 node scripts/check-project.cjs
 ```
 
@@ -144,7 +151,7 @@ Consulte [Settings → Pages](https://github.com/MHueto/Memorias_perdidas/settin
 - Seu navegador e se estava jogando no computador ou celular.
 - Uma captura de tela, se possível.
 
-Por ser um protótipo, a arte, os controles, a apresentação e o conteúdo ainda podem mudar. O foco atual é tornar a primeira memória jogável, compreensível e educativa.
+Por ser um protótipo, a arte, os controles, a apresentação e o conteúdo ainda podem mudar. O foco é uma campanha compreensível e educativa, que precisa continuar sendo testada com jogadores reais.
 
 ---
 

@@ -27,6 +27,8 @@ Não é necessário executar `npm install`. HTML, CSS e JavaScript são servidos
 | Resumos, dicas, glossário e revisão educativa | [js/roma-learning.js](../js/roma-learning.js), [css/roma-learning.css](../css/roma-learning.css) |
 | Consulta dos livros e comparação das pistas | [js/roma-history.js](../js/roma-history.js), [css/roma-mechanics.css](../css/roma-mechanics.css) |
 | Mapa, rotas e interface compacta | [js/roma-map.js](../js/roma-map.js), [css/roma-interface.css](../css/roma-interface.css) |
+| Linha do tempo e progresso das quatro etapas | [campanha-roma.html](../campanha-roma.html), [js/roma-campaign.js](../js/roma-campaign.js), [js/roma-campaign-ui.js](../js/roma-campaign-ui.js) |
+| Fundação, expansão e Pax Romana | [roma-jornadas.html](../roma-jornadas.html), [js/roma-journey.js](../js/roma-journey.js), [js/roma-campaign-data.js](../js/roma-campaign-data.js), [css/roma-campaign.css](../css/roma-campaign.css) |
 | Imagens, animações e cenários | [assets/images](../assets/images/) |
 
 Os arquivos `enemy.js`, `game.js`, `player.js` e `utils.js` em `js/` estão reservados e vazios nesta versão. A lógica atual não está neles. Foram preservados, assim como as artes de versões anteriores.
@@ -38,6 +40,7 @@ Isso é uma posição no cenário, não o tamanho do personagem.
 - **Cofre:** no início de `js/teste-escola.js`, procure as constantes `COFRE_..._CHAO_Y`. Cada sala tem sua própria constante, comentada com a imagem correspondente.
 - **Escola:** no mesmo arquivo, procure `scenes` e altere `floorY` somente da área desejada.
 - **Roma:** em `js/roma.js`, procure `const areas` e o `floorY` da área desejada.
+- **Três novas memórias:** em `js/roma-campaign-data.js`, cada capítulo possui seu próprio `floor`. A câmera, os objetos e os personagens usam essa mesma linha de chão.
 - Diminuir `floorY` sobe a linha do chão; aumentar desce. Teste pequenos ajustes e confira as entradas e saídas.
 - `playerSize`/`PLAYER_SIZE` alteram o tamanho. Não os use para corrigir apenas a altura em relação ao chão.
 
@@ -56,6 +59,7 @@ Com Node.js 24 instalado, na raiz do repositório:
 ```bash
 node --test scripts/check-project.test.cjs
 node --test scripts/check-learning.test.cjs
+node --test scripts/check-campaign.test.cjs
 node scripts/check-project.cjs
 ```
 
@@ -82,6 +86,8 @@ Use uma janela privativa ou um perfil separado para não apagar seu progresso pe
 6. Confira os desafios e as cinco comparações históricas até o encerramento. Os registros originais não devem ser alterados.
 7. Recarregue a fase de Roma e confira a retomada do progresso.
 8. Repita as interações principais no celular: texto legível, botão Continuar acessível e setas sem selecionar texto ao segurar.
+9. Na campanha v11, conclua as três novas etapas pela linha do tempo. Teste leitura obrigatória, tentativas incorretas, retomada após recarregar, entrega de materiais, rota do porto e canal de água.
+10. Termine a queda e confira as quatro memórias concluídas no arquivo, inclusive após recarregar. Um save antigo apenas da queda não deve concluir as etapas novas.
 
 ## Publicação
 
